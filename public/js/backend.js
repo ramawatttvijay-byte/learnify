@@ -127,6 +127,7 @@
     j, ready, refresh, toast, buy,
     get isReady() { return isReady; },
     me: () => me, enrolled: () => enrolled.slice(),
+    async reloadMe() { await loadMe(); return me; },
     async login(email, password) { const d = await j('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }); me = d.user; await loadMe(); await refresh(); return me; },
     async signup(f) { let ref = ''; try { ref = localStorage.getItem('lf_ref') || ''; } catch (e) {} const d = await j('/auth/signup', { method: 'POST', body: JSON.stringify({ ...f, ref }) }); me = d.user; await loadMe(); await refresh(); return me; },
     async logout() { try { await j('/auth/logout', { method: 'POST', body: '{}' }); } catch (e) {} me = null; enrolled = []; await refresh(); },

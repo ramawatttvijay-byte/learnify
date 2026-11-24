@@ -89,7 +89,7 @@ test('learn is locked until payment; Razorpay verify unlocks and pays referrer',
   assert.equal(aff.data.all, 625); assert.equal(aff.data.pending, 625); assert.equal(aff.data.balance, 0);
   assert.equal(aff.data.referrals.length, 1);
   const lb = await call('GET', '/leaderboard?range=7d', undefined, alice);
-  assert.deepEqual(lb.data.top, [{ n: 'Alice', v: 625, me: true }]); assert.equal(lb.data.myRank, 1);
+  assert.equal(lb.data.top.length, 1); assert.equal(lb.data.top[0].n, 'Alice'); assert.equal(lb.data.top[0].v, 625); assert.equal(lb.data.top[0].me, true); assert.equal(lb.data.top[0].em, 'al•••e@x.com'); assert.ok(!JSON.stringify(lb.data).includes('alice@x.com')); assert.equal(lb.data.myRank, 1);
   const pr = await call('POST', '/progress', { slug: 'meta-ads', lesson: 1 }, bob);
   assert.deepEqual(pr.data.done, [1]);
 });
@@ -140,4 +140,19 @@ test('admin lists, settings, images, manual enroll', async () => {
   const o = await call('POST', '/pay/order', { kind: 'package', id: pkgId }, bob);
   assert.equal(o.data.amount, 499900);
   assert.equal((await call('GET', '/nope')).status, 404);
+});
+
+test('profile photo upload and masked emails', async () => {
+  const s = await call('POST', '/auth/signup', { name: 'Photo User', email: 'photo.user@gmail.com', password: 'password123' });
+  const bad = await call('POST', '/me/avatar', { data: 'data:text/html;base64,PGgxPg==' }, s.cookie);
+  assert.equal(bad.status, 400);
+  const ok = await call('POST', '/me/avatar', { data: 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==' }, s.cookie);
+  assert.equal(ok.status, 200); assert.match(ok.data.avatar, /^a_/);
+  const me = await call('GET', '/me', undefined, s.cookie);
+  assert.equal(me.data.user.avatar, ok.data.avatar);
+  const img = await call('GET', '/img/' + ok.data.avatar);
+  assert.equal(img.status, 200);
+  const del = await call('DELETE', '/me/avatar', undefined, s.cookie);
+  assert.equal(del.status, 200);
+  assert.equal((await call('GET', '/img/' + ok.data.avatar)).status, 404);
 });

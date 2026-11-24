@@ -103,3 +103,11 @@ export function driveId(input) {
   if (m) return m[1];
   return /^[\w-]{20,}$/.test(s) ? s : '';
 }
+
+/* "riya.sharma@gmail.com" -> "ri•••••a@gmail.com": enough to recognise, not enough to leak */
+export function maskEmail(e) {
+  const [u, d] = String(e || '').split('@');
+  if (!u || !d) return '';
+  const keep = u.length <= 3 ? 1 : 2;
+  return u.slice(0, keep) + '•'.repeat(Math.max(3, Math.min(6, u.length - keep - 1))) + (u.length > 3 ? u.slice(-1) : '') + '@' + d;
+}

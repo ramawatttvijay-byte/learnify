@@ -1,7 +1,7 @@
 // Learnify API: one handler for every /api/* route (Cloudflare Worker via worker.mjs, or Netlify Function).
 import {
   getDb, newId, now, httpError, json, hashPassword, checkPassword, needsRehash, signToken, verifyToken,
-  sessionCookie, clearCookie, readCookie, hmacHex, safeEqual, isEmail, clean, isHttps, driveId
+  sessionCookie, clearCookie, readCookie, hmacHex, safeEqual, isEmail, clean, isHttps, driveId, maskEmail
 } from './lib/core.mjs';
 
 export const config = { path: '/api/*' };
@@ -60,7 +60,13 @@ async function currentUser(req, db) {
 }
 
 const adminList = () => String(process.env.ADMIN_EMAILS || '').toLowerCase().split(',').map(s => s.trim()).filter(Boolean);
-const publicUser = u => ({ id: u._id, name: u.name, email: u.email, phone: u.phone || '', city: u.city || '', about: u.about || '', role: u.role, code: u.code, plan: u.plan || '', createdAt: u.createdAt });
+const publicUser = u => ({ id: u._id, name: u.name, email: u.email, phone: u.phone || '', city: u.city || '', about: u.about || '', role: u.role, code: u.code, plan: u.plan || '', avatar: u.avatar || '', createdAt: u.createdAt });
+/* what other students may see about a person: name, photo, masked email */
+const person = u => u ? { n: u.name, av: u.avatar || '', em: maskEmail(u.email) } : { n: 'Learner', av: '', em: '' };
+async function peopleById(db, ids) {
+  const list = ids.length ? await db.collection('users').find({ _id: { $in: [...new Set(ids)] } }).toArray() : [];
+  return Object.fromEntries(list.map(u => [u._id, person(u)]));
+}
 
 async function startSession(db, user) {
   const sv = (user.sv || 0) + 1; // logging in here signs out every other device
@@ -136,6 +142,23 @@ on('PUT', '/me', async ({ db, user, body }) => {
   const set = { name: clean(body.name, 80) || user.name, phone: clean(body.phone, 20).replace(/[^\d+]/g, ''), city: clean(body.city, 60), about: clean(body.about, 300) };
   await db.collection('users').updateOne({ _id: user._id }, { $set: set });
   return json({ user: publicUser({ ...user, ...set }) });
+}, { auth: true });
+
+on('POST', '/me/avatar', async ({ db, user, body }) => {
+  const m = String(body.data || '').match(/^data:(image\/(webp|jpeg|png));base64,([A-Za-z0-9+/=]+)$/);
+  if (!m) throw httpError(400, 'Please upload a JPG, PNG or WebP photo');
+  if (m[3].length > 300000) throw httpError(400, 'Photo is too large');
+  const id = newId('a_');
+  await db.collection('images').insertOne({ _id: id, type: m[1], data: m[3], owner: user._id, createdAt: now() });
+  if (user.avatar) await db.collection('images').deleteOne({ _id: user.avatar, owner: user._id });
+  await db.collection('users').updateOne({ _id: user._id }, { $set: { avatar: id } });
+  return json({ avatar: id });
+}, { auth: true });
+
+on('DELETE', '/me/avatar', async ({ db, user }) => {
+  if (user.avatar) await db.collection('images').deleteOne({ _id: user.avatar, owner: user._id });
+  await db.collection('users').updateOne({ _id: user._id }, { $set: { avatar: '' } });
+  return json({ avatar: '' });
 }, { auth: true });
 
 on('POST', '/me/password', async ({ db, user, body }) => {
@@ -332,14 +355,18 @@ on('GET', '/affiliate', async ({ db, user }) => {
   });
   const s = (await db.collection('site').findOne({ _id: 'settings' })) || {};
   const refs = await db.collection('users').find({ referredBy: user._id }).sort({ createdAt: -1 }).limit(100).toArray();
+  const recent = live.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 100);
+  const ords = recent.length ? await db.collection('orders').find({ _id: { $in: recent.map(c => c.orderId) } }).toArray() : [];
+  const buyerOf = Object.fromEntries(ords.map(o => [o._id, o.userId]));
+  const ppl = await peopleById(db, Object.values(buyerOf));
   return json({
     code: user.code, commission: s.commission ?? 625, minPayout: s.minPayout ?? 500,
     today: sum(sod), todayN: cnt(sod), d7: sum(new Date(t - 7 * DAY)), d7N: cnt(new Date(t - 7 * DAY)),
     d30: sum(new Date(t - 30 * DAY)), d30N: cnt(new Date(t - 30 * DAY)), all: live.reduce((a, c) => a + c.amount, 0), allN: live.length,
     pending, balance, week,
-    sales: live.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 100).map(c => ({ d: c.createdAt, name: c.buyerName, course: c.title, amt: c.amount, st: effStatus(c) })),
+    sales: recent.map(c => { const p = ppl[buyerOf[c.orderId]] || {}; return { d: c.createdAt, name: c.buyerName, av: p.av || '', em: p.em || '', course: c.title, amt: c.amount, st: effStatus(c) }; }),
     payouts: ps.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(p => ({ d: p.createdAt, amt: p.amount, mode: p.method, st: p.status })),
-    referrals: refs.map(r => ({ name: r.name, d: r.createdAt }))
+    referrals: refs.map(r => ({ name: r.name, av: r.avatar || '', em: maskEmail(r.email), d: r.createdAt }))
   });
 }, { auth: true });
 
@@ -352,11 +379,10 @@ on('GET', '/leaderboard', async ({ db, url, user }) => {
   const tot = {};
   cs.forEach(c => { tot[c.affiliateId] = (tot[c.affiliateId] || 0) + c.amount; });
   const top = Object.entries(tot).sort((a, b) => b[1] - a[1]).slice(0, 20);
-  const users = await db.collection('users').find({ _id: { $in: top.map(t => t[0]) } }).toArray();
-  const nm = Object.fromEntries(users.map(u => [u._id, u.name]));
+  const ppl = await peopleById(db, top.map(t => t[0]));
   const all = Object.entries(tot).sort((a, b) => b[1] - a[1]);
   const mine = all.findIndex(([id]) => id === user._id);
-  return json({ range, top: top.map(([id, v]) => ({ n: nm[id] || 'Learner', v, me: id === user._id || undefined })), myRank: mine < 0 ? null : mine + 1, myTotal: mine < 0 ? 0 : all[mine][1] });
+  return json({ range, top: top.map(([id, v]) => ({ ...(ppl[id] || person(null)), v, me: id === user._id || undefined })), myRank: mine < 0 ? null : mine + 1, myTotal: mine < 0 ? 0 : all[mine][1] });
 }, { auth: true });
 
 on('POST', '/payouts', async ({ db, user, body }) => {
