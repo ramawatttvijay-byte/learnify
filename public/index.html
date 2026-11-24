@@ -545,6 +545,7 @@ footer nav a{text-decoration:none}
 <link rel="stylesheet" href="css/app.css">
 <script src="js/backend.js"></script>
 <link rel="stylesheet" href="css/apple.css">
+<link rel="stylesheet" href="css/watch.css">
 </head>
 <body>
 
@@ -838,6 +839,7 @@ footer nav a{text-decoration:none}
 <section data-page="jobs" id="jobs"><div id="jobsRoot"></div></section>
 
 <section class="cdp" data-page="course" id="course"><div class="wrap" id="cdpWrap"></div></section>
+<section data-page="watch" id="watch" hidden><div id="watchRoot"></div></section>
 <div class="mbar" id="mbar" hidden></div>
 <section class="adm" data-page="admin" id="admin">
   <div class="wrap">
@@ -1001,7 +1003,7 @@ function renderTeam(){
 const GETS=[['▶','Live classes on Zoom','Every topic taught live, screen-share demos'],['⟲','Class recordings','Missed a class? Watch it any time'],['?','Doubt support','Q&A after every class + direct help'],['✓','Homework every class','Practise on real work, build a portfolio']];
 function lessonBtn(m,i){
   const canPlay=S.admin||m.free;
-  if((m.video||m.drive)&&canPlay)return `<button class="pl" type="button" data-play="${i}" aria-label="Play ${esc(m.t)}">▶</button>`;
+  if((m.video||m.drive)&&canPlay)return `<a class="pl" href="#watch-${esc(curCourse?curCourse.s:'')}/${i+1}" aria-label="Play ${esc(m.t)}">▶</a>`;
   if(m.url&&canPlay&&safeUrl(m.url))return `<a class="pl" href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener" aria-label="Open ${esc(m.t)}">↗</a>`;
   return `<span class="pl" title="${m.video||m.url||m.locked?'Unlocks after enrollment':'Taught live'}" aria-hidden="true">${m.video||m.url||m.locked?LOCK:'<svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>'}</span>`;
 }
@@ -1012,7 +1014,7 @@ function renderCourse(slug){
   if(!c||c.status==='hidden'){w.innerHTML=`<div class="lock"><h1>Course not found</h1><p class="lead" style="margin:12px auto">This course may have moved.</p><a class="btn btn-main" href="#courses">See all courses</a></div>`;document.getElementById('mbar').hidden=true;return}
   const live=c.status==='live',pay=safeUrl(c.pay),wa=waLink(`Hi Learnify, I want to join the ${c.t} course.`);
   const owned=window.LFAPI&&LFAPI.enrolled().includes(c.s);
-  const enroll=owned?`<a class="btn btn-main" href="#dash-learn-${esc(c.s)}">Continue learning</a>`:live&&window.LFAPI?`<button type="button" class="btn btn-main" data-buy="course:${esc(c.s)}">Enroll now · ${priceTxt(c.price)}</button>`:live?(pay?`<a class="btn btn-main" href="${esc(pay)}" target="_blank" rel="noopener">Enroll now · ${priceTxt(c.price)}</a>`:`<a class="btn btn-main" href="${wa?esc(wa):'#contact'}"${wa?' target="_blank" rel="noopener"':''}>Enroll now · ${priceTxt(c.price)}</a>`)
+  const enroll=owned?`<a class="btn btn-main" href="#watch-${esc(c.s)}">Continue learning</a>`:live&&window.LFAPI?`<button type="button" class="btn btn-main" data-buy="course:${esc(c.s)}">Enroll now · ${priceTxt(c.price)}</button>`:live?(pay?`<a class="btn btn-main" href="${esc(pay)}" target="_blank" rel="noopener">Enroll now · ${priceTxt(c.price)}</a>`:`<a class="btn btn-main" href="${wa?esc(wa):'#contact'}"${wa?' target="_blank" rel="noopener"':''}>Enroll now · ${priceTxt(c.price)}</a>`)
                    :`<a class="btn btn-main" href="${wa?esc(wa):'#contact'}"${wa?' target="_blank" rel="noopener"':''}>Join the waitlist</a>`;
   const mods=c.modules||[],th=thumbOf(c);
   w.innerHTML=`<div class="crumb" role="navigation" aria-label="Breadcrumb"><a href="#home">Home</a><span>/</span><a href="#courses">Courses</a><span>/</span><span>${esc(c.t)}</span></div>
@@ -1029,7 +1031,7 @@ function renderCourse(slug){
     ${enroll}
     ${wa?`<a class="btn btn-alt" href="${esc(waLink('Hi Learnify, I have a question about the '+c.t+' course.'))}" target="_blank" rel="noopener" style="width:100%">Ask on WhatsApp</a>`:''}
     <ul><li>Recorded lessons, watch any time</li><li>Daily live sessions on Zoom</li><li>Homework + doubt support</li><li>Taught in simple Hinglish</li></ul>
-    ${live&&!pay?`<p class="note">We'll confirm your seat and share payment details on WhatsApp.</p>`:''}
+    ${live&&!pay&&!window.LFAPI?`<p class="note">We'll confirm your seat and share payment details on WhatsApp.</p>`:''}
   </div></aside></div>`;
   const mb=document.getElementById('mbar');mb.hidden=false;mb.innerHTML=`<div><b>${priceTxt(c.price)}</b><br><small class="muted">${esc(c.t)}</small></div>${enroll.replace(/class="btn btn-main"/,'class="btn btn-main" style="width:auto"').replace(/ · ₹[\d,]+/,'')}`;
   w.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',()=>playLesson(mods[+b.dataset.play])));
@@ -1185,7 +1187,9 @@ const pages=['home','about','courses','contact','login','dashboard','admin','pac
 let PAGE='home';function curPage(){return PAGE}
 function route(){
   const h=(location.hash||'#home').slice(1);
+  if(h.startsWith('dash-learn-')){location.replace('#watch-'+h.slice(11));return}
   let page=pages.includes(h)?h:null, target=null;
+  const wt=h.match(/^watch-([a-z0-9-]+)(?:\/(\d+))?$/);if(wt)page='watch';
   if(/^dash-[a-z0-9-]+$/.test(h))page='dashboard';
   if(page==='dashboard'&&!getUser()){if(window.LFAPI&&!LFAPI.isReady){LFAPI.ready.then(route);return}location.hash='#login';return}
   if(page==='login'&&getUser()){location.hash='#dashboard';return}
@@ -1201,6 +1205,7 @@ function route(){
   if(page==='admin')renderAdmin();
   document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('act',a.dataset.nav===page));
   if(page==='dashboard'&&window.LFApp)LFApp.show(h==='dashboard'?'dashboard':h);
+  if(page==='watch'&&window.LFWatch)LFWatch.show(wt[1],+wt[2]||0);
   if((page==='packages'||page==='jobs')&&window.LFApp)LFApp.page(page);
   if(target&&!pages.includes(h)&&page!=='dashboard'){requestAnimationFrame(()=>target.scrollIntoView())}else{window.scrollTo(0,0)}
 }
@@ -1264,6 +1269,7 @@ document.getElementById('lf').addEventListener('submit',e=>{
 
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll(".stack td:not([data-l])")){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest("table").rows[0].cells[i]?.textContent||""}}).observe(document,{childList:true,subtree:true})</script>
 <script src="js/app.js"></script>
+<script src="js/watch.js"></script>
 <script src="js/apple.js"></script>
 </body>
 </html>

@@ -113,7 +113,7 @@
           try {
             const v = await j('/pay/verify', { method: 'POST', body: JSON.stringify(resp) });
             await loadMe(); await refresh(); toast('Payment successful. Your course is unlocked!', true);
-            location.hash = '#dash-learn-' + (v.slugs[0] || '');
+            location.hash = '#watch-' + (v.slugs[0] || '');
           } catch (e) { toast('Payment received. If the course is not unlocked in a minute, contact us.'); }
         }
       });
