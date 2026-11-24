@@ -236,7 +236,11 @@ async function razorpay(path, payload) {
     body: JSON.stringify(payload)
   });
   const data = await r.json().catch(() => ({}));
-  if (!r.ok) { console.error('Razorpay error', data); throw httpError(502, 'Payment service error, please try again'); }
+  if (!r.ok) {
+    const why = data?.error?.description || ('HTTP ' + r.status);
+    console.error('Razorpay error', r.status, JSON.stringify(data));
+    throw httpError(502, r.status === 401 ? 'Payment setup error: Razorpay keys are wrong (' + why + ')' : 'Payment service error: ' + why);
+  }
   return data;
 }
 
