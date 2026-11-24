@@ -75,9 +75,17 @@ function user(){return L.getUser()||{name:'Learner',email:''}}
 function shell(){
   const u=user();let g='';
   const nav=MODS.map(([grp,id,label,ic])=>{const h=grp&&grp!==g?`<div class="sg">${grp}</div>`:'';g=grp;return h+`<a href="#${id}" data-m="${id}">${I(IC[ic])}<span>${label}</span></a>`}).join('');
-  return `<div class="ap"><aside class="side2" id="side2" aria-label="Student menu"><div class="me2"><span class="av3">${esc(ini(u.name))}</span><span><b>${esc(u.name)}</b><small>${esc(u.email)}</small><br><span class="pk">${ME.pkg.toUpperCase()}</span></span></div>${nav}<a href="#login" class="lo2" id="lo2">${I(IC.out)}<span>Log out</span></a></aside><div class="scrim" id="scrim"></div><main class="mainp" id="mainp"></main></div>`;
+  const wa=L.waLink('Hi, I am '+u.name+', a Learnify student. I need help.');
+  return `<div class="ap"><aside class="side2" id="side2" aria-label="Student menu">
+   <div class="me2"><span class="av3"><span>${esc(ini(u.name))}</span></span><span class="mei"><b>${esc(u.name)}</b><small>${esc(u.email)}</small><span class="pk">${esc(ME.pkg)} plan</span></span></div>
+   <a class="meearn" href="#dash-payouts"><small>Total earned</small><b>${inr(ME.all||0)}</b><span>Wallet ${inr(ME.bal||0)} →</span></a>
+   <nav class="sidenav" aria-label="Dashboard sections">${nav}</nav>
+   ${wa?`<a class="sidehelp" href="${esc(wa)}" target="_blank" rel="noopener"><b>Need help?</b><small>Message your mentor on WhatsApp</small></a>`:''}
+   <a href="#login" class="lo2" id="lo2">${I(IC.out)}<span>Log out</span></a></aside><div class="scrim" id="scrim"></div><main class="mainp" id="mainp"></main></div>`;
 }
-function top(title,extra=''){return `<div class="ptop"><button class="sbtn" type="button" id="sbtn" aria-label="Open menu">${I(IC.menu)}</button><h1>${title}</h1><div class="sp">${extra}<a class="bell" href="#dash-notifications" aria-label="Notifications">${I(IC.bell)}<i></i></a></div></div>`}
+const GROUP_OF=id=>{const m=MODS.find(x=>x[1]===id);return m&&m[0]?m[0]:'Overview'};
+function top(title,extra=''){const hr=new Date().getHours(),greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
+  return `<div class="ptop"><button class="sbtn" type="button" id="sbtn" aria-label="Open menu">${I(IC.menu)}</button><div class="pttl"><small>${current==='dashboard'?greet+' · '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'}):esc(GROUP_OF(current))}</small><h1>${title}</h1></div><div class="sp">${extra}<a class="bell" href="#dash-notifications" aria-label="Notifications">${I(IC.bell)}<i></i></a><a class="tav" href="#dash-profile" aria-label="Profile">${esc(ini(user().name))}</a></div></div>`}
 function mount(){
   const root=document.getElementById('app');if(root.dataset.ready)return;root.innerHTML=shell();root.dataset.ready='1';
   document.getElementById('lo2').addEventListener('click',e=>{e.preventDefault();L.logout()});
@@ -87,6 +95,7 @@ function mount(){
 }
 function show(hash){
   mount();
+  {const nv=document.querySelector('nav');if(nv)document.documentElement.style.setProperty('--navh',nv.offsetHeight+'px')}
   if(LIVE&&!liveLoaded){document.getElementById('mainp').innerHTML='<div class="empty2">Loading your dashboard…</div>';loadLive().then(()=>show(hash));return}
   current=hash||'dashboard';
   let mod=current==='dashboard'?'dashboard':current.replace(/^dash-/,''),arg='';
@@ -98,8 +107,25 @@ function show(hash){
   m.innerHTML=fn(arg);
   const sb=document.getElementById('sbtn');if(sb)sb.addEventListener('click',()=>{document.getElementById('side2').classList.add('open');document.getElementById('scrim').classList.add('open')});
   (AFTER[mod]||(()=>{}))(arg);
+  enter(m);
 }
 function rerender(){plansHome();if(L.curPage()==='dashboard')show(current);const p=L.curPage();if(p==='packages')renderPackages();if(p==='jobs')renderJobs()}
+/* ---------- motion ---------- */
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function enter(m){[...m.children].forEach((el,i)=>{el.style.setProperty('--d',Math.min(i,10)*55+'ms');el.classList.remove('rin');void el.offsetWidth;el.classList.add('rin')});countUps(m)}
+function countUps(scope){scope.querySelectorAll('[data-cu]').forEach(el=>{const to=Number(el.dataset.cu)||0,fmt=el.dataset.fmt||'inr';const f=v=>fmt==='inr'?inr(Math.round(v)):Math.round(v).toLocaleString('en-IN')+(fmt==='pct'?'%':'');
+  if(RM||!to){el.textContent=f(to);return}const t0=performance.now(),dur=1100;const tick=t=>{const k=Math.min(1,(t-t0)/dur),e=1-Math.pow(2,-10*k);el.textContent=f(to*(k>=1?1:e));if(k<1)requestAnimationFrame(tick)};requestAnimationFrame(tick)})}
+function smooth(pts){if(pts.length<2)return '';let d=`M${pts[0][0]},${pts[0][1]}`;for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;const lo=Math.min(p1[1],p2[1]),hi=Math.max(p1[1],p2[1]),cl=v=>Math.max(lo,Math.min(hi,v));const c1=[p1[0]+(p2[0]-p0[0])/6,cl(p1[1]+(p2[1]-p0[1])/6)],c2=[p2[0]-(p3[0]-p1[0])/6,cl(p2[1]-(p3[1]-p1[1])/6)];d+=` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0]},${p2[1]}`}return d}
+function areaChart(data,{h=230,id='ac'}={}){const W=640,H=h,pl=8,pr=8,pt=20,pb=34,n=data.length;const mx=Math.max(1,...data.map(d=>d.v));const step=(W-pl-pr)/Math.max(1,n-1);
+  const pts=data.map((d,i)=>[Math.round(pl+i*step),Math.round(pt+(H-pt-pb)*(1-d.v/mx))]);const line=smooth(pts),area=line+` L${pts[n-1][0]},${H-pb} L${pts[0][0]},${H-pb} Z`;
+  return `<div class="achart" id="${id}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7b3cff" stop-opacity=".38"/><stop offset="1" stop-color="#7b3cff" stop-opacity="0"/></linearGradient><linearGradient id="${id}l" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4b1ff5"/><stop offset=".55" stop-color="#a60eef"/><stop offset="1" stop-color="#ff0a8c"/></linearGradient></defs>
+   ${[0,1,2,3].map(k=>`<line class="gl" x1="0" x2="${W}" y1="${pt+(H-pt-pb)*k/3}" y2="${pt+(H-pt-pb)*k/3}"/>`).join('')}
+   <path class="ar" d="${area}" fill="url(#${id}g)"/><path class="ln" d="${line}" stroke="url(#${id}l)" pathLength="1"/>
+   ${pts.map((p,i)=>`<circle class="dt" cx="${p[0]}" cy="${p[1]}" r="5" style="--i:${i}"/>`).join('')}</svg>
+   <div class="axl">${data.map(d=>`<span>${esc(d.l)}</span>`).join('')}</div>
+   <div class="hz">${data.map((d,i)=>`<button type="button" tabindex="-1" style="left:${pts[i][0]/W*100}%;--y:${pts[i][1]/H*100}%" data-tip="${esc(d.l)} · ${inr(d.v)}"></button>`).join('')}</div></div>`}
+const agoTxt=d=>{const m=Math.round((Date.now()-d)/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';const h=Math.round(m/60);if(h<24)return h+'h ago';const dd=Math.round(h/24);return dd<7?dd+'d ago':dstr(d)};
+const ring=(pct,label,size=92)=>{const r=size/2-7,c=2*Math.PI*r;return `<span class="ring3" style="width:${size}px;height:${size}px"><svg viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${r}" class="rbg"/><circle cx="${size/2}" cy="${size/2}" r="${r}" class="rfg" style="stroke-dasharray:${c};stroke-dashoffset:${c};--to:${c*(1-pct/100)}"/></svg><b>${label}</b></span>`};
 /* ---------- helpers ---------- */
 function copyBtn(id,text){return `<button class="btn btn-main" type="button" data-copy="${esc(text)}" style="min-height:44px">Copy</button>`}
 function wireCopy(){document.querySelectorAll('#mainp [data-copy]').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.copy;const done=()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1600)};try{navigator.clipboard.writeText(t).then(done,()=>{b.textContent='Select & copy'})}catch(e){b.textContent='Select & copy'}}))}
@@ -303,6 +329,105 @@ if(LIVE){
   liveForm('scF','scM',async v=>{if(v[1]!==v[2])throw new Error('New passwords do not match');await LFAPI.j('/me/password',{method:'POST',body:JSON.stringify({current:v[0],next:v[1]})});return 'Password updated.'})};
  AFTER.kyc=async()=>{liveForm('kyF','kyM',async v=>{await LFAPI.j('/kyc',{method:'POST',body:JSON.stringify({name:v[0],pan:v[1],upi:v[2],holder:v[3],account:v[4],ifsc:v[5]})});return 'Submitted. The team will verify it within 2 working days.'});
   try{const k=await LFAPI.j('/kyc');if(k.status!=='none'){const m=document.getElementById('kyM');m.textContent='Status: '+k.status+(k.note?' · '+k.note:'');m.className='amsg '+(k.status==='approved'?'ok':'')}}catch(e){}};
+}
+
+/* ---------- premium dashboard (v3) ---------- */
+{
+ const TOP_AS={};
+ const firstName=()=>esc(user().name.split(' ')[0]||'there');
+ const ownedCourses=()=>{const en=LIVE?LFAPI.enrolled():L.visible().map(c=>c.s);return L.visible().filter(c=>en.includes(c.s))};
+ const levelInfo=()=>{let i=MILES.findIndex(m=>ME.all<m.amt);if(i<0)i=MILES.length-1;const prev=i?MILES[i-1].amt:0,nx=MILES[i];const pct=Math.max(0,Math.min(100,Math.round((ME.all-prev)/(nx.amt-prev)*100)));return{i,prev,nx,pct}};
+ const walletCard=(big)=>`<section class="walc${big?' big':''}"><div class="wch"><span class="wlogo">L</span><small>Learnify Wallet</small><span class="chip" aria-hidden="true"></span></div>
+   <small class="wlb">Available to withdraw</small><b class="wamt" data-cu="${ME.bal||0}">${inr(ME.bal||0)}</b>
+   <div class="wsplit"><span><i class="g"></i>Pending <b>${inr(ME.pending||0)}</b></span><span><i class="y"></i>Min. withdrawal <b>${inr(ME.minPayout||500)}</b></span></div>
+   <div class="wbtns"><a class="wb1" href="#dash-payouts">Withdraw</a><a class="wb2" href="#dash-payouts" data-scroll="hist">History</a></div></section>`;
+ VIEWS.dashboard=()=>{
+  const lv=levelInfo(),own=ownedCourses(),c0=own[0];
+  const wk=WEEK.reduce((a,w)=>a+w.v,0);
+  const qa=[[refUrl(),'link','Copy my link','Share & earn '+inr(ME.comm||625)+' per sale','copy'],[c0?'#watch-'+c0.s:'#dash-courses','play','Continue learning',c0?esc(c0.t):'Pick a skill to start'],['#dash-payouts','wal','Withdraw',inr(ME.bal||0)+' available'],['#dash-tools','tool','Marketing kit','Creatives & captions']];
+  return top('Welcome back, '+firstName()+' 👋',`<a class="btn btn-main tbtn" href="#dash-affiliate">${I(IC.link)}<span>Share &amp; earn</span></a>`)+SAMPLE+
+  `<div class="dg">
+   <section class="hero3 c8"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
+    <div class="h3l"><small>Total earnings</small><b class="hbig" data-cu="${ME.all||0}">${inr(ME.all||0)}</b>
+     <span class="hpill">${I(IC.up)} ${inr(wk)} in the last 7 days</span>
+     <div class="hstats"><div><small>Today</small><b data-cu="${ME.today||0}">${inr(ME.today||0)}</b><em>${ME.todayN||0} sales</em></div><div><small>7 days</small><b data-cu="${ME.w||0}">${inr(ME.w||0)}</b><em>${ME.wN||0} sales</em></div><div><small>30 days</small><b data-cu="${ME.m||0}">${inr(ME.m||0)}</b><em>${ME.mN||0} sales</em></div></div></div>
+    <div class="h3r">${areaChart(WEEK,{h:330,id:'hsp'})}</div></section>
+   <div class="c4">${walletCard(false)}</div>
+   <div class="qa c12">${qa.map((q,i)=>q[4]==='copy'?`<button type="button" class="qt" data-copy-qa="${esc(q[0])}" style="--i:${i}"><span class="qi">${I(IC[q[1]])}</span><span><b>${q[2]}</b><small>${q[3]}</small></span></button>`:`<a class="qt" href="${esc(q[0])}" style="--i:${i}"><span class="qi">${I(IC[q[1]])}</span><span><b>${q[2]}</b><small>${q[3]}</small></span></a>`).join('')}</div>
+   <section class="cardp c8"><div class="chd"><div><h2>Earnings</h2><small class="muted">Commission per day · last 7 days</small></div><b class="chv" data-cu="${wk}">${inr(wk)}</b></div>${wk?areaChart(WEEK,{h:260,id:'ern'}):`<div class="empty3">${I(IC.up)}<b>Your first sale will show up here</b><small>Share your link and earn ${inr(ME.comm||625)} on every course sold.</small><a class="btn btn-main" href="#dash-affiliate">Get my link</a></div>`}</section>
+   <section class="cardp c4 cont"><h2>Continue learning</h2>${c0?`<a class="ccl" href="#watch-${esc(c0.s)}"><span class="cth">${thumbOf(c0)?`<img src="${esc(thumbOf(c0))}" alt="" loading="lazy">`:''}<span class="cpl">${I('<path d="M8 5v14l11-7z" fill="currentColor"/>')}</span></span></a><div class="crw"><span id="cRing">${ring(0,'0%',78)}</span><div><b>${esc(c0.t)}</b><small class="muted" id="cTxt">${(c0.modules||[]).length} lessons</small></div></div><a class="btn btn-main" href="#watch-${esc(c0.s)}" id="cBtn">Resume course</a>`:`<div class="empty3">${I(IC.book)}<b>No course yet</b><small>Enrol in a skill to start learning.</small><a class="btn btn-main" href="#courses">Explore skills</a></div>`}</section>
+   <section class="cardp c7"><div class="chd"><h2>Recent activity</h2><a class="mut2" href="#dash-team">See all</a></div>${SALES.length?`<ul class="feed">${SALES.slice(0,6).map((x,i)=>`<li style="--i:${i}"><span class="fav">${esc(ini(x.name))}</span><div><b>${esc(x.name)}</b> joined <b>${esc(x.course)}</b><small>${agoTxt(x.d)} · ${stTag(x.st)}</small></div><span class="famt">+${inr(x.amt)}</span></li>`).join('')}</ul>`:`<div class="empty3">${I(IC.team)}<b>No sales yet</b><small>When someone buys with your link, it appears here instantly.</small></div>`}</section>
+   <section class="cardp c5"><div class="chd"><h2>Top earners</h2><a class="mut2" href="#dash-leaderboard">Leaderboard</a></div><div id="topEarn"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></section>
+   <section class="lvl c12"><div class="lvh"><div><small>Your level</small><b>${lv.i?esc(MILES[lv.i-1].t):'Getting started'}</b></div><div class="lvn"><small>Next: ${esc(lv.nx.t)}</small><b>${inr(Math.max(0,lv.nx.amt-ME.all))} to go</b></div></div>
+    <div class="lvt"><i style="--w:${Math.round((lv.i+lv.pct/100)/MILES.length*100)}%"></i>${MILES.map((m,i)=>`<span class="lvd ${i<lv.i?'dn':i===lv.i?'cur':''}" style="left:${(i+1)/MILES.length*100}%"><em>${esc(m.t)}</em><small>${inr(m.amt)}</small></span>`).join('')}</div>
+    <p class="lvr">🎁 Next reward: <b>${esc(lv.nx.rw)}</b></p><a class="wbtn" href="#dash-milestones">All rewards →</a></section>
+  </div>`};
+ AFTER.dashboard=async()=>{
+  document.querySelectorAll('[data-copy-qa]').forEach(b=>b.addEventListener('click',()=>{try{navigator.clipboard.writeText(b.dataset.copyQa).then(()=>{const s=b.querySelector('small'),o=s.textContent;s.textContent='Link copied ✓';b.classList.add('ok');setTimeout(()=>{s.textContent=o;b.classList.remove('ok')},1800)})}catch(e){}}));
+  const own=ownedCourses(),c0=own[0];
+  if(LIVE&&c0){try{const d=await LFAPI.j('/learn/'+encodeURIComponent(c0.s));const n=(d.course.modules||[]).length,dn=(d.done||[]).length,pct=n?Math.round(dn/n*100):0;
+    const r=document.getElementById('cRing');if(r){r.innerHTML=ring(pct,pct+'%',78);requestAnimationFrame(()=>r.querySelector('.rfg').classList.add('go'))}
+    const t=document.getElementById('cTxt');if(t)t.textContent=`${dn} of ${n} lessons completed`;const b=document.getElementById('cBtn');if(b&&n){const nx=(d.done||[]).length<n?[...Array(n).keys()].find(i=>!(d.done||[]).includes(i)):0;b.href=`#watch-${c0.s}/${nx+1}`;b.textContent=dn?`Resume lesson ${nx+1}`:'Start lesson 1'}}catch(e){}}
+  const box=document.getElementById('topEarn');if(!box)return;let list=[],me=null;
+  if(LIVE){try{const r=await LFAPI.j('/leaderboard?range=30d');list=r.top;me=r}catch(e){}}else list=LB.slice(0,5);
+  box.innerHTML=list.length?`<ol class="tops">${list.slice(0,5).map((x,i)=>`<li class="${x.me?'me':''}" style="--i:${i}"><span class="rk r${i+1}">${i+1}</span><span class="fav">${esc(ini(x.n))}</span><b>${esc(x.n)}${x.me?' <em>You</em>':''}</b><span class="tv">${inr(x.v)}</span><i style="--w:${Math.round(x.v/list[0].v*100)}%"></i></li>`).join('')}</ol>${me&&me.myRank&&me.myRank>5?`<p class="myr">You are <b>#${me.myRank}</b> this month · ${inr(me.myTotal)}</p>`:''}`:`<div class="empty3 sm"><b>No earners yet this month</b><small>Make the first sale and take the #1 spot.</small></div>`};
+ /* courses */
+ VIEWS.courses=()=>{const own=ownedCourses(),os=own.map(c=>c.s),rest=L.visible().filter(c=>!os.includes(c.s));
+  return top('My Courses')+`<div class="mcl">${own.length?own.map((c,i)=>{const th=thumbOf(c),n=(c.modules||[]).length;return `<article class="mcw" style="--i:${i}"><a class="mth" href="#watch-${esc(c.s)}">${th?`<img src="${esc(th)}" alt="" loading="lazy">`:''}<span class="cpl">${I('<path d="M8 5v14l11-7z" fill="currentColor"/>')}</span></a><div class="mbd"><span class="tg2 pu">${esc(c.cat||'Course')}</span><h3>${esc(c.t)}</h3><small class="muted">By ${esc(c.by)} · ${n?n+' lessons':'Lessons coming soon'}</small><div class="mpr"><div class="prog2"><i data-cp="${esc(c.s)}" style="width:0"></i></div><small data-ct="${esc(c.s)}">Not started</small></div><div class="mbt"><a class="btn btn-main" href="#watch-${esc(c.s)}" data-cb="${esc(c.s)}">Start learning</a><a class="btn pill pill-o" href="#course-${esc(c.s)}">Course details</a></div></div></article>`}).join(''):`<div class="empty3">${I(IC.book)}<b>You haven't enrolled in a course yet</b><small>Pick a skill and start today.</small><a class="btn btn-main" href="#courses">Explore skills</a></div>`}</div>
+  ${rest.length?`<div class="chd" style="margin-top:8px"><h2 class="sh2" style="margin:0">Explore more skills</h2></div><div class="mc">${rest.map(c=>{const th=thumbOf(c);return `<a class="mcc lkc" href="#course-${esc(c.s)}"><span class="im">${th?`<img src="${esc(th)}" alt="" loading="lazy">`:''}<span class="lkb">${I(IC.lock)}</span></span><span class="bd"><b>${esc(c.t)}</b><small>${c.status==='live'?'Unlock · '+priceTxt(c.price):'Coming soon'}</small></span></a>`}).join('')}</div>`:''}`};
+ AFTER.courses=async()=>{if(!LIVE)return;for(const c of ownedCourses()){try{const d=await LFAPI.j('/learn/'+encodeURIComponent(c.s));const n=(d.course.modules||[]).length,dn=(d.done||[]).length,pct=n?Math.round(dn/n*100):0;
+   const bar=document.querySelector(`[data-cp="${c.s}"]`),t=document.querySelector(`[data-ct="${c.s}"]`),b=document.querySelector(`[data-cb="${c.s}"]`);
+   if(bar)requestAnimationFrame(()=>bar.style.width=pct+'%');if(t)t.textContent=n?`${pct}% complete · ${dn} of ${n} lessons`:'Lessons coming soon';if(b&&dn)b.textContent=pct>=100?'Watch again':'Continue learning'}catch(e){}}};
+ /* payouts & wallet */
+ VIEWS.payouts=()=>{const tot=PAYOUTS.filter(p=>/paid/i.test(p[3])).reduce((a,p)=>a+p[1],0);
+  const tx=[...SALES.slice(0,10).map(s=>({d:s.d,t:'Commission · '+s.name,s:s.course,a:s.amt,st:s.st})),...PAYOUTS.map(p=>({d:p[0],t:'Withdrawal · '+p[2],s:p[3],a:-p[1],st:p[3]}))].sort((a,b)=>b.d-a.d).slice(0,14);
+  return top('Payouts & Wallet')+SAMPLE+`<div class="dg">
+   <div class="c5">${walletCard(true)}</div>
+   <div class="c7 kp3"><div class="kq"><span class="qi">${I(IC.pay)}</span><small>Total paid out</small><b data-cu="${tot}">${inr(tot)}</b><em>${PAYOUTS.length} withdrawals</em></div><div class="kq"><span class="qi">${I(IC.flag)}</span><small>Pending (7-day hold)</small><b data-cu="${ME.pending||0}">${inr(ME.pending||0)}</b><em>Becomes available after 7 days</em></div><div class="kq"><span class="qi">${I(IC.star)}</span><small>Payout day</small><b>Monday</b><em>Every week, to your UPI or bank</em></div></div>
+   <section class="cardp c12 wdr"><div class="chd"><div><h2>Request a withdrawal</h2><small class="muted">Minimum ${inr(ME.minPayout||500)} · KYC must be approved</small></div></div>
+    <form class="fm wdf" id="wdF" novalidate><label>Amount<span class="rs"><i>₹</i><input type="number" min="${ME.minPayout||500}" max="${ME.bal}" value="${ME.bal||''}" placeholder="0" inputmode="numeric" id="wdA"></span></label><label>Send to<select><option>UPI (from your KYC)</option><option>Bank account (from your KYC)</option></select></label>
+     <div class="full chips">${[500,1000,2500].map(v=>`<button type="button" data-amt="${v}" ${v>ME.bal?'disabled':''}>${inr(v)}</button>`).join('')}<button type="button" data-amt="${ME.bal||0}" ${ME.bal?'':'disabled'}>Max</button></div>
+     <div class="full"><button class="btn btn-main" type="submit" ${ME.bal>=(ME.minPayout||500)?'':'disabled'}>Request withdrawal</button> <span class="amsg" id="wdM"></span>${ME.bal<(ME.minPayout||500)?`<small class="muted" style="display:block;margin-top:8px">You need at least ${inr(ME.minPayout||500)} available to withdraw. Keep sharing your link!</small>`:''}</div></form></section>
+   <section class="cardp c12" id="hist"><div class="chd"><h2>Wallet activity</h2><small class="muted">${tx.length} recent</small></div>${tx.length?`<ul class="txl">${tx.map((x,i)=>`<li style="--i:${i}"><span class="txi ${x.a<0?'out':'in'}">${I(x.a<0?'<path d="M12 5v14M5 12l7 7 7-7"/>':'<path d="M12 19V5M5 12l7-7 7 7"/>')}</span><div><b>${esc(x.t)}</b><small>${dfull(x.d)} · ${esc(x.s)}</small></div>${stTag(x.st)}<span class="txa ${x.a<0?'out':'in'}">${x.a<0?'−':'+'}${inr(Math.abs(x.a))}</span></li>`).join('')}</ul>`:`<div class="empty3">${I(IC.wal)}<b>No wallet activity yet</b><small>Commissions and withdrawals will appear here.</small></div>`}</section>
+  </div>`};
+ const oldPay=AFTER.payouts;
+ AFTER.payouts=()=>{if(oldPay)oldPay();const a=document.getElementById('wdA');document.querySelectorAll('[data-amt]').forEach(b=>b.addEventListener('click',()=>{a.value=b.dataset.amt;document.querySelectorAll('[data-amt]').forEach(x=>x.classList.toggle('on',x===b))}));
+  if(location.hash==='#dash-payouts'&&sessionStorage.getItem('lf_hist')){sessionStorage.removeItem('lf_hist');document.getElementById('hist').scrollIntoView({behavior:'smooth'})}};
+ document.addEventListener('click',e=>{const h=e.target.closest('[data-scroll="hist"]');if(h)try{sessionStorage.setItem('lf_hist','1')}catch(_){}});
+ /* leaderboard */
+ if(LIVE){AFTER.leaderboard=()=>{const R=['today','7d','30d','all'],cache={};
+  const draw=async k=>{const box=document.getElementById('lbBox');if(!cache[k]){box.innerHTML='<div class="skel tall"></div>';try{cache[k]=await LFAPI.j('/leaderboard?range='+R[k])}catch(e){cache[k]={top:[]}}}
+   const d=cache[k],list=d.top||[];if(!list.length){box.innerHTML=`<div class="empty3">${I(IC.trophy)}<b>No sales in this period yet</b><small>Be the first name on the board.</small><a class="btn btn-main" href="#dash-affiliate">Get my link</a></div>`;return}
+   const pod=(x,cls,r)=>x?`<div class="${cls}${x.me?' me':''}">${r===1?'<span class="crown">♛</span>':''}<span class="av4">${ini(x.n)}</span><b>${esc(x.n)}${x.me?' · You':''}</b><small>${inr(x.v)}</small><span class="st3"><span>${r}</span></span></div>`:'<div></div>';
+   box.innerHTML=`<div class="hof"><span class="orb o1"></span><span class="orb o2"></span><h2>Learnify Hall of Fame</h2><p class="sub">Top earners · ${['today','last 7 days','last 30 days','all time'][k]}</p><div class="pod">${pod(list[1],'p2',2)}${pod(list[0],'p1',1)}${pod(list[2],'p3',3)}</div>${d.myRank?`<p class="myr2">Your rank: <b>#${d.myRank}</b> · ${inr(d.myTotal)}</p>`:`<p class="myr2">You're not on the board yet. One sale gets you in!</p>`}</div>${list.length>3?`<section class="cardp"><ol class="tops big">${list.slice(3).map((x,i)=>`<li class="${x.me?'me':''}" style="--i:${i}"><span class="rk">${i+4}</span><span class="fav">${esc(ini(x.n))}</span><b>${esc(x.n)}${x.me?' <em>You</em>':''}</b><span class="tv">${inr(x.v)}</span><i style="--w:${Math.round(x.v/list[0].v*100)}%"></i></li>`).join('')}</ol></section>`:''}`;enter(box)};
+  document.querySelectorAll('#lbSeg button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#lbSeg button').forEach(x=>x.classList.toggle('on',x===b));draw(+b.dataset.k)}));draw(2);document.querySelectorAll('#lbSeg button').forEach(x=>x.classList.toggle('on',x.dataset.k==='2'))}}
+}
+
+/* ---------- affiliate + milestones (v3) ---------- */
+{
+ VIEWS.affiliate=()=>{const link=refUrl(),code=refCode().toUpperCase(),wa='https://wa.me/?text='+encodeURIComponent('Learn a digital skill that pays — live classes + recordings in Hinglish. Join with my link: '+link);
+  const sales=SALES.length,earned=SALES.reduce((a,x)=>a+(x.st==='Cancelled'?0:x.amt),0);
+  return top('Affiliate Links')+SAMPLE+`<div class="dg">
+   <section class="afh c12"><span class="orb o1"></span><span class="orb o2"></span>
+    <div class="afl"><small>Your personal link</small><h2>Share once. Earn ${inr(ME.comm||625)} on every sale.</h2>
+     <div class="afrow"><code>${esc(link)}</code><button class="btn afc" type="button" data-copy="${esc(link)}">Copy</button></div>
+     <div class="afs"><a class="afb wa" href="${esc(wa)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.4.5c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.7-.1l.9-1.1c.2-.3.4-.2.6-.1l2 .9c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>Share on WhatsApp</a><span class="afcd">Code <b>${esc(code)}</b><button type="button" data-copy="${esc(code)}">Copy</button></span></div></div>
+    <div class="afst"><div><small>People joined</small><b data-cu="${REFS.length||0}" data-fmt="n">${REFS.length||0}</b></div><div><small>Sales</small><b data-cu="${sales}" data-fmt="n">${sales}</b></div><div><small>Earned</small><b data-cu="${earned}">${inr(earned)}</b></div></div></section>
+   <section class="cardp c7"><h2>Link for a specific course</h2><small class="muted" style="margin-top:-8px">Send people straight to the course they want.</small>
+    <div class="flt"><label style="flex:1;min-width:200px">Course or package<select id="afSel">${L.visible().map(c=>`<option value="${esc(c.s)}">${esc(c.t)}</option>`).join('')}${packages().map(p=>`<option value="pkg-${esc(p.id)}">${esc(p.t)} package</option>`).join('')}</select></label></div>
+    <div class="copyrow"><code id="afOut">${esc(refUrl(L.visible()[0]&&L.visible()[0].s))}</code><button class="btn btn-main" type="button" id="afCopy" style="min-height:44px">Copy link</button></div></section>
+   <section class="cardp c5 how"><h2>How you earn</h2><ol class="steps3"><li><i>1</i><div><b>Share your link</b><small>WhatsApp, Instagram, anywhere.</small></div></li><li><i>2</i><div><b>Friend buys a course</b><small>Payment happens on Learnify.</small></div></li><li><i>3</i><div><b>You earn ${inr(ME.comm||625)}</b><small>Available after a 7-day hold, paid every Monday.</small></div></li></ol></section>
+   <section class="cardp c12"><div class="chd"><h2>People who joined with your link</h2><small class="muted">${(LIVE?REFS.length:SALES.length)} total</small></div>${(LIVE?REFS:SALES.slice(0,10).map(s=>({name:s.name,d:s.d}))).length?`<ul class="feed">${(LIVE?REFS:SALES.slice(0,10).map(s=>({name:s.name,d:s.d}))).map((r,i)=>{const bought=SALES.find(x=>x.name===r.name);return `<li style="--i:${i}"><span class="fav">${esc(ini(r.name))}</span><div><b>${esc(r.name)}</b><small>Joined ${dfull(new Date(r.d))}</small></div>${bought?`<span class="tg2 ok">Bought · ${esc(bought.course)}</span>`:'<span class="tg2 pu">Signed up</span>'}</li>`}).join('')}</ul>`:`<div class="empty3">${I(IC.team)}<b>Nobody has joined yet</b><small>Share your link above — your first referral shows up here.</small></div>`}</section>
+  </div>`};
+ VIEWS.milestones=()=>{let i=MILES.findIndex(m=>ME.all<m.amt);if(i<0)i=MILES.length;const prev=i?MILES[i-1].amt:0,nx=MILES[Math.min(i,MILES.length-1)];const pct=i>=MILES.length?100:Math.round((ME.all-prev)/(nx.amt-prev)*100);
+  const ems=['🎓','👕','🎂','🎧','✈️'];const ms=L.S.missions||[];
+  return top('Milestones & Rewards')+SAMPLE+`<div class="dg">
+   <section class="msh c12"><span class="orb o1"></span><span class="orb o2"></span><div>${ring(pct,pct+'%',120)}</div><div class="msi"><small>Total earned</small><b data-cu="${ME.all||0}">${inr(ME.all||0)}</b><p>${i>=MILES.length?'You have unlocked every reward. Legend!':`${inr(nx.amt-ME.all)} more to reach <b>${esc(nx.t)}</b> and unlock ${esc(nx.rw.toLowerCase())}.`}</p></div></section>
+   <div class="rwg c12">${MILES.map((m,k)=>{const dn=ME.all>=m.amt,cur=k===i;const p=Math.min(100,Math.round(ME.all/m.amt*100));return `<article class="rw ${dn?'dn':cur?'cur':''}" style="--i:${k}"><span class="rwe">${ems[k]||'🏆'}</span><span class="tg2 ${dn?'ok':cur?'pu':'pn'}">${dn?'Unlocked':cur?'In progress':'Locked'}</span><h3>${esc(m.t)}</h3><b class="rwa">${inr(m.amt)}</b><p>${esc(m.rw)}</p><div class="prog2"><i style="width:${p}%"></i></div><small>${dn?'Reward unlocked':p+'% there'}</small></article>`}).join('')}</div>
+   <div class="c12"><h2 class="sh2">Missions</h2></div>
+   ${ms.length?`<div class="g3 c12">${ms.map((m,k)=>`<article class="mis" style="background:${m.img?`linear-gradient(transparent 30%,rgba(10,7,24,.85)),url('${esc(blob(m.img))}') center/cover`:['linear-gradient(150deg,#14143a,#4b1ff5)','linear-gradient(150deg,#a60eef,#ff0a8c)','linear-gradient(150deg,#ff6a3d,#ffb400)'][k%3]}"><span class="big">${esc(m.target)}<small>sales</small></span><h3>${esc(m.t)}</h3><p>${esc(m.reward)}</p>${m.valid?`<span class="val">Valid: ${esc(m.valid)}</span>`:''}</article>`).join('')}</div>`:`<section class="cardp c12"><div class="empty3">${I(IC.flag)}<b>No missions running right now</b><small>Special sales challenges with extra rewards will appear here.</small></div></section>`}
+  </div>`};
+ AFTER.milestones=()=>{const r=document.querySelector('.msh .rfg');if(r)requestAnimationFrame(()=>r.classList.add('go'))};
 }
 
 window.LFApp={show,page(p){if(p==='packages')renderPackages();if(p==='jobs')renderJobs()},admin:ADMIN,reset(){const r=document.getElementById('app');if(r){r.innerHTML='';delete r.dataset.ready}}};

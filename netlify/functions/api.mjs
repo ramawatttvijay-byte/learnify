@@ -343,7 +343,7 @@ on('GET', '/affiliate', async ({ db, user }) => {
   });
 }, { auth: true });
 
-on('GET', '/leaderboard', async ({ db, url }) => {
+on('GET', '/leaderboard', async ({ db, url, user }) => {
   const range = url.searchParams.get('range') || 'all';
   const since = { today: new Date(new Date().setHours(0, 0, 0, 0)), '7d': new Date(Date.now() - 7 * DAY), '30d': new Date(Date.now() - 30 * DAY) }[range];
   const q = { status: { $ne: 'cancelled' } };
@@ -354,7 +354,9 @@ on('GET', '/leaderboard', async ({ db, url }) => {
   const top = Object.entries(tot).sort((a, b) => b[1] - a[1]).slice(0, 20);
   const users = await db.collection('users').find({ _id: { $in: top.map(t => t[0]) } }).toArray();
   const nm = Object.fromEntries(users.map(u => [u._id, u.name]));
-  return json({ range, top: top.map(([id, v]) => ({ n: nm[id] || 'Learner', v })) });
+  const all = Object.entries(tot).sort((a, b) => b[1] - a[1]);
+  const mine = all.findIndex(([id]) => id === user._id);
+  return json({ range, top: top.map(([id, v]) => ({ n: nm[id] || 'Learner', v, me: id === user._id || undefined })), myRank: mine < 0 ? null : mine + 1, myTotal: mine < 0 ? 0 : all[mine][1] });
 }, { auth: true });
 
 on('POST', '/payouts', async ({ db, user, body }) => {

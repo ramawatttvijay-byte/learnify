@@ -89,7 +89,7 @@ test('learn is locked until payment; Razorpay verify unlocks and pays referrer',
   assert.equal(aff.data.all, 625); assert.equal(aff.data.pending, 625); assert.equal(aff.data.balance, 0);
   assert.equal(aff.data.referrals.length, 1);
   const lb = await call('GET', '/leaderboard?range=7d', undefined, alice);
-  assert.deepEqual(lb.data.top, [{ n: 'Alice', v: 625 }]);
+  assert.deepEqual(lb.data.top, [{ n: 'Alice', v: 625, me: true }]); assert.equal(lb.data.myRank, 1);
   const pr = await call('POST', '/progress', { slug: 'meta-ads', lesson: 1 }, bob);
   assert.deepEqual(pr.data.done, [1]);
 });
