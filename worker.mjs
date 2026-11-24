@@ -38,7 +38,12 @@ export default {
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
       if (!env.MONGODB_URI) return proxy(request, env.API_FALLBACK || FALLBACK_API);
       const id = env.API.idFromName('main');
-      return env.API.get(id, { locationHint: 'apac' }).fetch(request); // near the Mumbai database
+      const res = await env.API.get(id, { locationHint: 'apac' }).fetch(request); // near the Mumbai database
+      if (res.status >= 400 && url.pathname.startsWith('/api/pay/')) {
+        const text = await res.clone().text();
+        console.log('API error', res.status, url.pathname, text.slice(0, 400)); // visible in Cloudflare logs
+      }
+      return res;
     }
     return env.ASSETS.fetch(request);
   }
