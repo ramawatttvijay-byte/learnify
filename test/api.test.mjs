@@ -156,3 +156,25 @@ test('profile photo upload and masked emails', async () => {
   assert.equal(del.status, 200);
   assert.equal((await call('GET', '/img/' + ok.data.avatar)).status, 404);
 });
+
+test('certificate unlocks only after every lesson; verify is public; pulse reports sales', async () => {
+  const a = await call('POST', '/auth/signup', { name: 'Cert Admin', email: 'boss2@learnify.in', password: 'password123' });
+  await db.collection('users').updateOne({ email: 'boss2@learnify.in' }, { $set: { role: 'admin' } });
+  const adm = (await call('POST', '/auth/login', { email: 'boss2@learnify.in', password: 'password123' })).cookie;
+  await call('PUT', '/admin/courses/cert-course', { t: 'Cert Course', status: 'live', price: 100, modules: [{ t: 'L1' }, { t: 'L2' }] }, adm);
+  const st = await call('POST', '/auth/signup', { name: 'Cert Student', email: 'cs@x.com', password: 'password123' });
+  await call('POST', '/admin/enroll', { email: 'cs@x.com', slug: 'cert-course' }, adm);
+  let c = await call('GET', '/certificate/cert-course', undefined, st.cookie);
+  assert.equal(c.data.ready, false); assert.equal(c.data.total, 2);
+  await call('POST', '/progress', { slug: 'cert-course', lesson: 0 }, st.cookie);
+  await call('POST', '/progress', { slug: 'cert-course', lesson: 1 }, st.cookie);
+  c = await call('GET', '/certificate/cert-course', undefined, st.cookie);
+  assert.equal(c.data.ready, true); assert.match(c.data.id, /^LF-[0-9A-F]{10}$/); assert.equal(c.data.name, 'Cert Student');
+  const v = await call('GET', '/verify/' + c.data.id);
+  assert.equal(v.data.valid, true); assert.equal(v.data.course, 'Cert Course');
+  assert.equal((await call('GET', '/verify/LF-0000000000')).status, 404);
+  const ov = await call('GET', '/admin/overview', undefined, adm);
+  assert.equal(ov.status, 200); assert.equal(ov.data.series.length, 30); assert.ok(Array.isArray(ov.data.recent));
+  const pu = await call('GET', '/pulse?since=' + new Date(Date.now() - 864e5).toISOString(), undefined, st.cookie);
+  assert.equal(pu.status, 200); assert.ok(Array.isArray(pu.data.items));
+});

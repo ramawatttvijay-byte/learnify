@@ -84,13 +84,13 @@ function shell(){
   return `<div class="ap"><aside class="side2" id="side2" aria-label="Student menu">
    <div class="me2"><a class="av3" href="#dash-profile" aria-label="My profile">${avatar(u.name,u.avatar,"lg")}</a><span class="mei"><b>${esc(u.name)}</b><small>${esc(maskE(u.email))}</small><span class="pk">${esc(ME.pkg)} plan</span></span></div>
    <a class="meearn" href="#dash-payouts"><small>Total earned</small><b>${inr(ME.all||0)}</b><span>Wallet ${inr(ME.bal||0)} →</span></a>
-   <nav class="sidenav" aria-label="Dashboard sections">${nav}</nav>
+   <div class="sidenav" role="navigation" aria-label="Dashboard sections">${nav}</div>
    ${wa?`<a class="sidehelp" href="${esc(wa)}" target="_blank" rel="noopener"><b>Need help?</b><small>Message your mentor on WhatsApp</small></a>`:''}
    <a href="#login" class="lo2" id="lo2">${I(IC.out)}<span>Log out</span></a></aside><div class="scrim" id="scrim"></div><main class="mainp" id="mainp"></main></div>`;
 }
 const GROUP_OF=id=>{const m=MODS.find(x=>x[1]===id);return m&&m[0]?m[0]:'Overview'};
 function top(title,extra=''){const hr=new Date().getHours(),greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
-  return `<div class="ptop"><button class="sbtn" type="button" id="sbtn" aria-label="Open menu">${I(IC.menu)}</button><div class="pttl"><small>${current==='dashboard'?greet+' · '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'}):esc(GROUP_OF(current))}</small><h1>${title}</h1></div><div class="sp">${extra}<a class="bell" href="#dash-notifications" aria-label="Notifications">${I(IC.bell)}<i></i></a><a class="tav" href="#dash-profile" aria-label="Profile">${avatar(user().name,user().avatar)}</a></div></div>`}
+  return `<div class="ptop"><button class="sbtn" type="button" id="sbtn" aria-label="Open menu">${I(IC.menu)}</button><div class="pttl"><small>${current==='dashboard'?greet+' · '+new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'}):esc(GROUP_OF(current))}</small><h1>${title}</h1></div><div class="sp">${extra}${LIVE?`<button class="bell" type="button" id="bellB" aria-label="Notifications">${I(IC.bell)}<span class="bn" id="bellN" hidden></span></button>`:`<a class="bell" href="#dash-notifications" aria-label="Notifications">${I(IC.bell)}<i></i></a>`}<a class="tav" href="#dash-profile" aria-label="Profile">${avatar(user().name,user().avatar)}</a></div></div>`}
 function mount(){
   const root=document.getElementById('app');if(root.dataset.ready)return;root.innerHTML=shell();root.dataset.ready='1';
   document.getElementById('lo2').addEventListener('click',e=>{e.preventDefault();L.logout()});
@@ -113,6 +113,7 @@ function show(hash){
   const sb=document.getElementById('sbtn');if(sb)sb.addEventListener('click',()=>{document.getElementById('side2').classList.add('open');document.getElementById('scrim').classList.add('open')});
   (AFTER[mod]||(()=>{}))(arg);
   enter(m);
+  if(window.__lfAfterShow)window.__lfAfterShow();
 }
 function rerender(){plansHome();if(L.curPage()==='dashboard')show(current);const p=L.curPage();if(p==='packages')renderPackages();if(p==='jobs')renderJobs()}
 /* ---------- motion ---------- */
@@ -123,9 +124,9 @@ function countUps(scope){scope.querySelectorAll('[data-cu]').forEach(el=>{const 
 function smooth(pts){if(pts.length<2)return '';let d=`M${pts[0][0]},${pts[0][1]}`;for(let i=0;i<pts.length-1;i++){const p0=pts[i-1]||pts[i],p1=pts[i],p2=pts[i+1],p3=pts[i+2]||p2;const lo=Math.min(p1[1],p2[1]),hi=Math.max(p1[1],p2[1]),cl=v=>Math.max(lo,Math.min(hi,v));const c1=[p1[0]+(p2[0]-p0[0])/6,cl(p1[1]+(p2[1]-p0[1])/6)],c2=[p2[0]-(p3[0]-p1[0])/6,cl(p2[1]-(p3[1]-p1[1])/6)];d+=` C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0]},${p2[1]}`}return d}
 function areaChart(data,{h=230,id='ac'}={}){const W=640,H=h,pl=8,pr=8,pt=20,pb=34,n=data.length;const mx=Math.max(1,...data.map(d=>d.v));const step=(W-pl-pr)/Math.max(1,n-1);
   const pts=data.map((d,i)=>[Math.round(pl+i*step),Math.round(pt+(H-pt-pb)*(1-d.v/mx))]);const line=smooth(pts),area=line+` L${pts[n-1][0]},${H-pb} L${pts[0][0]},${H-pb} Z`;
-  return `<div class="achart" id="${id}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7b3cff" stop-opacity=".38"/><stop offset="1" stop-color="#7b3cff" stop-opacity="0"/></linearGradient><linearGradient id="${id}l" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4b1ff5"/><stop offset=".55" stop-color="#a60eef"/><stop offset="1" stop-color="#ff0a8c"/></linearGradient></defs>
+  return `<div class="achart" id="${id}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="${id}g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--acc,#5b2bf5);stop-opacity:.22"/><stop offset="1" style="stop-color:var(--acc,#5b2bf5);stop-opacity:0"/></linearGradient><linearGradient id="${id}l" x1="0" y1="0" x2="1" y2="0"><stop offset="0" style="stop-color:var(--acc,#5b2bf5)"/><stop offset="1" style="stop-color:var(--acc2,#8b3cf6)"/></linearGradient></defs>
    ${[0,1,2,3].map(k=>`<line class="gl" x1="0" x2="${W}" y1="${pt+(H-pt-pb)*k/3}" y2="${pt+(H-pt-pb)*k/3}"/>`).join('')}
-   <path class="ar" d="${area}" fill="url(#${id}g)"/><path class="ln" d="${line}" stroke="url(#${id}l)" pathLength="1"/>
+   <path class="ar" d="${area}" fill="url(#${id}g)"/><path class="ln" d="${line}" style="stroke:var(--acc,#5b2bf5)" pathLength="1"/>
    ${pts.map((p,i)=>`<circle class="dt" cx="${p[0]}" cy="${p[1]}" r="5" style="--i:${i}"/>`).join('')}</svg>
    <div class="axl">${data.map(d=>`<span>${esc(d.l)}</span>`).join('')}</div>
    <div class="hz">${data.map((d,i)=>`<button type="button" tabindex="-1" style="left:${pts[i][0]/W*100}%;--y:${pts[i][1]/H*100}%" data-tip="${esc(d.l)} · ${inr(d.v)}"></button>`).join('')}</div></div>`}
@@ -350,7 +351,7 @@ if(LIVE){
   const lv=levelInfo(),own=ownedCourses(),c0=own[0];
   const wk=WEEK.reduce((a,w)=>a+w.v,0);
   const qa=[[refUrl(),'link','Copy my link','Share & earn '+inr(ME.comm||625)+' per sale','copy'],[c0?'#watch-'+c0.s:'#dash-courses','play','Continue learning',c0?esc(c0.t):'Pick a skill to start'],['#dash-payouts','wal','Withdraw',inr(ME.bal||0)+' available'],['#dash-tools','tool','Marketing kit','Creatives & captions']];
-  return top('Welcome back, '+firstName()+' 👋',`<a class="btn btn-main tbtn" href="#dash-affiliate">${I(IC.link)}<span>Share &amp; earn</span></a>`)+SAMPLE+
+  return top('Welcome back, '+firstName(),`<a class="btn btn-main tbtn" href="#dash-affiliate">${I(IC.link)}<span>Share &amp; earn</span></a>`)+SAMPLE+
   `<div class="dg">
    <section class="hero3 c8"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
     <div class="h3l"><small>Total earnings</small><b class="hbig" data-cu="${ME.all||0}">${inr(ME.all||0)}</b>
@@ -365,14 +366,14 @@ if(LIVE){
    <section class="cardp c5"><div class="chd"><h2>Top earners</h2><a class="mut2" href="#dash-leaderboard">Leaderboard</a></div><div id="topEarn"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div></section>
    <section class="lvl c12"><div class="lvh"><div><small>Your level</small><b>${lv.i?esc(MILES[lv.i-1].t):'Getting started'}</b></div><div class="lvn"><small>Next: ${esc(lv.nx.t)}</small><b>${inr(Math.max(0,lv.nx.amt-ME.all))} to go</b></div></div>
     <div class="lvt"><i style="--w:${Math.round((lv.i+lv.pct/100)/MILES.length*100)}%"></i>${MILES.map((m,i)=>`<span class="lvd ${i<lv.i?'dn':i===lv.i?'cur':''}" style="left:${(i+1)/MILES.length*100}%"><em>${esc(m.t)}</em><small>${inr(m.amt)}</small></span>`).join('')}</div>
-    <p class="lvr">🎁 Next reward: <b>${esc(lv.nx.rw)}</b></p><a class="wbtn" href="#dash-milestones">All rewards →</a></section>
+    <p class="lvr">${I('<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18M12 8a3 3 0 1 1-3-3c2 0 3 3 3 3zm0 0a3 3 0 1 0 3-3c-2 0-3 3-3 3z"/>')}Next reward: <b>${esc(lv.nx.rw)}</b></p><a class="wbtn" href="#dash-milestones">All rewards →</a></section>
   </div>`};
  AFTER.dashboard=async()=>{
   document.querySelectorAll('[data-copy-qa]').forEach(b=>b.addEventListener('click',()=>{try{navigator.clipboard.writeText(b.dataset.copyQa).then(()=>{const s=b.querySelector('small'),o=s.textContent;s.textContent='Link copied ✓';b.classList.add('ok');setTimeout(()=>{s.textContent=o;b.classList.remove('ok')},1800)})}catch(e){}}));
   const own=ownedCourses(),c0=own[0];
   if(LIVE&&c0){try{const d=await LFAPI.j('/learn/'+encodeURIComponent(c0.s));const n=(d.course.modules||[]).length,dn=(d.done||[]).length,pct=n?Math.round(dn/n*100):0;
     const r=document.getElementById('cRing');if(r){r.innerHTML=ring(pct,pct+'%',78);requestAnimationFrame(()=>r.querySelector('.rfg').classList.add('go'))}
-    const t=document.getElementById('cTxt');if(t)t.textContent=`${dn} of ${n} lessons completed`;const b=document.getElementById('cBtn');if(b&&n){const nx=(d.done||[]).length<n?[...Array(n).keys()].find(i=>!(d.done||[]).includes(i)):0;b.href=`#watch-${c0.s}/${nx+1}`;b.textContent=dn?`Resume lesson ${nx+1}`:'Start lesson 1'}}catch(e){}}
+    const t=document.getElementById('cTxt');if(t)t.textContent=`${dn} of ${n} lessons completed`;const b=document.getElementById('cBtn');if(b&&n){const nx=(d.done||[]).length<n?[...Array(n).keys()].find(i=>!(d.done||[]).includes(i)):0;b.href=`#watch-${c0.s}/${dn>=n?1:nx+1}`;b.textContent=dn>=n?'Watch again':dn?`Resume lesson ${nx+1}`:'Start lesson 1'}}catch(e){}}
   const box=document.getElementById('topEarn');if(!box)return;let list=[],me=null;
   if(LIVE){try{const r=await LFAPI.j('/leaderboard?range=30d');list=r.top;me=r}catch(e){}}else list=LB.slice(0,5);
   box.innerHTML=list.length?`<ol class="tops">${list.slice(0,5).map((x,i)=>`<li class="${x.me?'me':''}" style="--i:${i}"><span class="rk r${i+1}">${i+1}</span>${avatar(x.n,x.av)}<span class="wn"><b>${esc(x.n)}${x.me?' <em>You</em>':''}</b>${x.em?`<small>${esc(x.em)}</small>`:""}</span><span class="tv">${inr(x.v)}</span><i style="--w:${Math.round(x.v/list[0].v*100)}%"></i></li>`).join('')}</ol>${me&&me.myRank&&me.myRank>5?`<p class="myr">You are <b>#${me.myRank}</b> this month · ${inr(me.myTotal)}</p>`:''}`:`<div class="empty3 sm"><b>No earners yet this month</b><small>Make the first sale and take the #1 spot.</small></div>`};
@@ -471,7 +472,94 @@ if(LIVE){
   q.addEventListener('input',run);document.querySelectorAll('#tmS button').forEach(b=>b.addEventListener('click',()=>{f=b.dataset.s;document.querySelectorAll('#tmS button').forEach(x=>x.classList.toggle('on',x===b));run()}))};
 }
 
-window.LFApp={show,page(p){if(p==='packages')renderPackages();if(p==='jobs')renderJobs()},admin:ADMIN,reset(){const r=document.getElementById('app');if(r){r.innerHTML='';delete r.dataset.ready}}};
+/* ---------- v5: notifications, certificates, admin analytics ---------- */
+{
+ const ICN={sale:'<path d="M12 19V5M5 12l7-7 7 7"/>',payout:'<rect x="2" y="6" width="20" height="13" rx="2"/><path d="M2 10h20"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>'};
+ /* ---- notifications: bell panel + live toasts ---- */
+ let NT={items:[],seen:0,since:null,timer:null,open:false};
+ try{NT.seen=+localStorage.getItem('lf_seen')||0}catch(e){}
+ const unread=()=>NT.items.filter(x=>new Date(x.d).getTime()>NT.seen).length;
+ function badge(){const n=unread(),b=document.getElementById('bellN');if(b){b.hidden=!n;b.textContent=n>9?'9+':n}}
+ function stack(){let s=document.getElementById('lfStack');if(!s){s=document.createElement('div');s.id='lfStack';s.setAttribute('aria-live','polite');document.body.appendChild(s)}return s}
+ function toast2(it){const el=document.createElement('div');el.className='lft';el.innerHTML=`<span class="nti">${I(ICN[it.t]||ICN.sale)}</span><div><b>${esc(it.title)}</b><small>${esc(it.body)}</small></div>`;stack().appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300)},5200)}
+ function panel(){const sp=document.querySelector('#mainp .ptop .sp');if(!sp)return;let p=document.getElementById('ntp');if(p){p.remove();NT.open=false;return}
+  p=document.createElement('div');p.id='ntp';p.className='ntp';p.setAttribute('role','dialog');p.setAttribute('aria-label','Notifications');
+  p.innerHTML=`<header><b>Notifications</b>${NT.items.length?'<button type="button" id="ntAll">Mark all as read</button>':''}</header>${NT.items.length?`<ul>${NT.items.slice(0,20).map(x=>`<li class="${new Date(x.d).getTime()>NT.seen?'new':''}"><span class="nti ${x.t}">${I(ICN[x.t]||ICN.sale)}</span><div><b>${esc(x.title)}</b><small>${esc(x.body)}</small><time>${agoTxt(new Date(x.d))}</time></div></li>`).join('')}</ul>`:`<div class="ntx">You're all caught up.<br>New sales and payouts show up here.</div>`}<footer><a href="#dash-notifications">View all activity</a></footer>`;
+  sp.appendChild(p);NT.open=true;const a=document.getElementById('ntAll');if(a)a.addEventListener('click',markRead);
+  setTimeout(()=>document.addEventListener('click',function off(e){if(!e.target.closest('#ntp,#bellB')){const q=document.getElementById('ntp');if(q)q.remove();NT.open=false;document.removeEventListener('click',off)}}),0)}
+ function markRead(){NT.seen=Date.now();try{localStorage.setItem('lf_seen',NT.seen)}catch(e){}badge();const p=document.getElementById('ntp');if(p)p.querySelectorAll('li.new').forEach(l=>l.classList.remove('new'))}
+ async function poll(first){if(!LIVE||!L.getUser())return;if(document.hidden&&!first)return;
+  try{const since=NT.since||new Date(Date.now()-14*864e5).toISOString();const r=await LFAPI.j('/pulse?since='+encodeURIComponent(since));NT.since=r.now;
+   if(r.items.length){const fresh=r.items.filter(x=>!NT.items.some(y=>y.d===x.d&&y.title===x.title));NT.items=[...fresh,...NT.items].slice(0,60);
+    if(!first){fresh.slice(0,3).forEach((x,i)=>setTimeout(()=>toast2(x),i*400));liveLoaded=false;if(L.curPage()==='dashboard'&&/^(dashboard|dash-payouts|dash-team)$/.test(location.hash.slice(1)||'dashboard'))setTimeout(()=>show(current),900)}}
+   badge()}catch(e){}}
+ function startPoll(){if(NT.timer||!LIVE)return;poll(true);NT.timer=setInterval(()=>poll(false),45000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)poll(false)})}
+ document.addEventListener('click',e=>{const b=e.target.closest('#bellB');if(b){e.preventDefault();panel();markRead()}});
+ const _show=show;
+ window.__lfAfterShow=()=>{startPoll();badge()};
+ /* ---- certificates ---- */
+ VIEWS.certificates=()=>{const own=LIVE?L.visible().filter(c=>LFAPI.enrolled().includes(c.s)):L.visible().slice(0,1);
+  return top('Certificates')+`<div class="dg">${own.length?own.map((c,i)=>`<section class="cardp c6 crt" style="--i:${i}" data-cs="${esc(c.s)}"><div class="crh"><span class="rwi">${I(IC.cert)}</span><div><b>${esc(c.t)}</b><small class="muted">Certificate of completion</small></div><span class="tg2 pn" data-cst>Checking…</span></div><div class="prog2"><i data-cpb style="width:0"></i></div><div class="crf"><small class="muted" data-ctx>Loading progress…</small><button type="button" class="btn btn-main" data-cert="${esc(c.s)}" disabled>View certificate</button></div></section>`).join(''):`<section class="cardp c12"><div class="empty3">${I(IC.cert)}<b>No certificates yet</b><small>Enrol in a skill and finish every lesson to earn a verified certificate.</small><a class="btn btn-main" href="#courses">Explore skills</a></div></section>`}</div>`};
+ AFTER.certificates=async()=>{for(const card of document.querySelectorAll('[data-cs]')){const s=card.dataset.cs;try{const r=LIVE?await LFAPI.j('/certificate/'+encodeURIComponent(s)):{ready:false,done:0,total:0};
+   const st=card.querySelector('[data-cst]'),bar=card.querySelector('[data-cpb]'),tx=card.querySelector('[data-ctx]'),b=card.querySelector('[data-cert]');
+   if(r.ready){st.className='tg2 ok';st.textContent='Earned';bar.style.width='100%';tx.textContent='Issued '+dfull(new Date(r.issuedAt))+' · ID '+r.id;b.disabled=false;b.onclick=()=>openCert(r)}
+   else{const p=r.total?Math.round(r.done/r.total*100):0;st.className='tg2 pu';st.textContent=p+'% complete';requestAnimationFrame(()=>bar.style.width=p+'%');tx.textContent=r.total?`${r.done} of ${r.total} lessons done · finish all to unlock`:'Lessons coming soon';b.textContent='Continue course';b.disabled=false;b.onclick=()=>location.hash='#watch-'+s}}catch(e){}}};
+ function openCert(r){const ov=document.createElement('div');ov.className='certov';const url=location.origin+'/#verify-'+r.id;
+  ov.innerHTML=`<div class="certbar"><button type="button" class="pr" id="cPr">Download PDF</button><button type="button" id="cX">Close</button></div>
+  <div class="cert3"><div class="cfr"></div><div class="cin"><div class="ctop"><img src="logo.webp" alt="Learnify"><div class="cid">Certificate ID ${esc(r.id)}<br>Verify at ${esc(url.replace(/^https?:\/\//,''))}</div></div>
+   <div class="ckick">Certificate of completion</div><div class="cttl">${esc(r.course)}</div>
+   <div class="cpres">This certifies that</div><div class="cname">${avatar(r.name,r.avatar)}<h2>${esc(r.name)}</h2></div>
+   <p class="cfor">has successfully completed all <b>${r.lessons} lessons</b> of the <b>${esc(r.course)}</b> programme at Learnify, including recorded lessons, live sessions and practical assignments.</p>
+   <div class="cbot"><div class="csig"><i>${esc(r.mentor)}</i><span>Mentor, Learnify</span></div><div class="csig"><i>${new Date(r.issuedAt).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</i><span>Date of issue</span></div><div class="cseal"><div><b>L</b>VERIFIED<br>LEARNIFY</div></div></div></div></div>`;
+  document.body.appendChild(ov);document.getElementById('cX').onclick=()=>ov.remove();document.getElementById('cPr').onclick=()=>window.print();ov.addEventListener('click',e=>{if(e.target===ov)ov.remove()})}
+ /* ---- public certificate check ---- */
+ async function verify(id){const r=document.getElementById('verifyRoot');if(!r)return;r.innerHTML='<div class="vbox"><p class="muted">Checking certificate…</p></div>';
+  let d={valid:false};try{const x=await fetch('/api/verify/'+encodeURIComponent(id));d=await x.json()}catch(e){}
+  r.innerHTML=d.valid?`<div class="vbox ok"><span class="vic">${I(ICN.check)}</span><small>Verified certificate</small><h1>${esc(d.name)}</h1><p>completed <b>${esc(d.course)}</b> at Learnify on ${new Date(d.issuedAt).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}.</p><code>${esc(d.id)}</code></div>`:`<div class="vbox"><span class="vic no">!</span><small>Not found</small><h1>We couldn't verify this certificate</h1><p>Check the ID and try again, or contact Learnify.</p><code>${esc(id)}</code></div>`}
+ /* ---- milestone icons instead of emoji ---- */
+ const RWI=['<path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/>','<path d="M8 3l-4 3 2 4 2-1v12h8V9l2 1 2-4-4-3c-1 1.5-2.5 2-4 2s-3-.5-4-2z"/>','<path d="M4 21h16M5 21V12h14v9M12 12V8M12 5v.01M8 12V9M16 12V9"/>','<path d="M3 14v-2a9 9 0 0 1 18 0v2"/><rect x="2" y="14" width="5" height="7" rx="1.5"/><rect x="17" y="14" width="5" height="7" rx="1.5"/>','<path d="M2 16l20-8-4 12-6-4-4 4v-6z"/>'];
+ const _ms=VIEWS.milestones;VIEWS.milestones=()=>{const ems=['🎓','👕','🎂','🎧','✈️'];let h=_ms();ems.forEach((e,i)=>{h=h.replace(`<span class="rwe">${e}</span>`,`<span class="rwi">${I(RWI[i])}</span>`)});return h};
+ /* ---- admin ---- */
+ const tagS=s=>`<span class="tag3 ${/paid|approved/.test(s)?'ok':/pending|submitted|created/.test(s)?'pn':/reject|cancel|refund/.test(s)?'no':''}">${esc(s)}</span>`;
+ const needLive=b=>{b.innerHTML='<div class="empty2">This section works on the live site, where real orders and students are stored.</div>'};
+ ADMIN.overview=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';let d;try{d=await LFAPI.j('/admin/overview')}catch(e){box.innerHTML=`<div class="empty2">${esc(e.message)}</div>`;return}
+  const ch=d.revPrev30?Math.round((d.rev30-d.revPrev30)/d.revPrev30*100):null,mx=Math.max(1,...d.byCourse.map(x=>x.v));
+  const ser=d.series.map(x=>({l:new Date(x.d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}),v:x.v}));
+  box.innerHTML=`<div class="adm-ov">
+   ${d.pendingPayouts||d.pendingKyc?`<div class="alert3 c12">${I(IC.bell)}<span>${d.pendingPayouts?`${d.pendingPayouts} payout request${d.pendingPayouts>1?'s':''} waiting`:''}${d.pendingPayouts&&d.pendingKyc?' · ':''}${d.pendingKyc?`${d.pendingKyc} KYC to review`:''}</span><a href="#admin" data-go="${d.pendingPayouts?'payouts':'kycs'}">Review now →</a></div>`:''}
+   <div class="kpx"><small>Revenue · last 30 days</small><b>${inr(d.rev30)}</b><em class="${ch==null?'':ch>=0?'up':'dn'}">${ch==null?'First month':(ch>=0?'▲ ':'▼ ')+Math.abs(ch)+'% vs previous 30 days'}</em></div>
+   <div class="kpx"><small>Total revenue</small><b>${inr(d.revenue)}</b><em>${d.sales} paid orders · ${inr(d.today)} today</em></div>
+   <div class="kpx"><small>Students</small><b>${d.students.toLocaleString('en-IN')}</b><em>+${d.newStudents} in the last 30 days</em></div>
+   <div class="kpx"><small>Affiliate commission</small><b>${inr(d.commission)}</b><em>${d.revenue?Math.round(d.commission/d.revenue*100):0}% of revenue</em></div>
+   <section class="cardp c8"><div class="chd"><h2>Revenue · 30 days</h2><small class="muted">${inr(d.rev30)}</small></div>${areaChart(ser.filter((_,i)=>i%1===0),{h:240,id:'arv'}).replace(/<div class="axl">[\s\S]*?<\/div>/,`<div class="axl">${ser.filter((_,i)=>i%5===0||i===29).map(x=>`<span>${x.l}</span>`).join('')}</div>`)}</section>
+   <section class="cardp c4"><h2>Revenue by course</h2>${d.byCourse.length?`<div class="cbar">${d.byCourse.map(x=>`<div><span><b>${esc(x.t)}</b><em>${inr(x.v)}</em></span><i><b style="width:${Math.round(x.v/mx*100)}%"></b></i></div>`).join('')}</div>`:'<div class="empty3 sm"><b>No sales yet</b></div>'}</section>
+   <section class="cardp c6"><div class="chd"><h2>Latest orders</h2><a class="mut2" href="#admin" data-go="orders">All orders</a></div>${d.recent.length?d.recent.map(o=>`<div class="arow">${who(o.n,o.em,o.av)}<span class="meta">${agoTxt(new Date(o.d))}</span><span class="amt3">${inr(o.amount)}</span></div>`).join(''):'<div class="empty3 sm"><b>No orders yet</b></div>'}</section>
+   <section class="cardp c6"><h2>Top affiliates</h2>${d.topAffiliates.length?d.topAffiliates.map((x,i)=>`<div class="arow"><span class="rk r${i+1}">${i+1}</span>${who(x.n,x.em,x.av)}<span class="amt3">${inr(x.v)}</span></div>`).join(''):'<div class="empty3 sm"><b>No affiliate sales yet</b></div>'}</section>
+  </div>`;goLinks(box)};
+ function goLinks(box){box.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();document.querySelector(`.atabs button[data-t="${a.dataset.go}"]`).click()}))}
+ ADMIN.orders=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';const d=await LFAPI.j('/admin/orders');const os=d.orders;
+  const draw=q=>{const f=os.filter(o=>!q||(o.name+' '+o.email+' '+o.title+' '+o.paymentId).toLowerCase().includes(q));return f.length?f.map(o=>`<div class="arow">${who(o.name,o.email,'')}<span class="meta" style="flex:1">${esc(o.title)}</span><span class="meta">${dfull(new Date(o.d))}</span>${tagS(o.status)}<span class="amt3">${inr(o.amount)}</span></div>`).join(''):'<div class="empty3 sm"><b>No orders found</b></div>'};
+  const paid=os.filter(o=>o.status==='paid');
+  box.innerHTML=`<section class="cardp"><div class="atl"><h2>Orders <small class="muted">${paid.length} paid · ${inr(paid.reduce((a,o)=>a+o.amount,0))}</small></h2><input type="search" id="aoQ" placeholder="Search name, email, course or payment ID"></div><div id="aoL">${draw('')}</div></section>`;
+  document.getElementById('aoQ').addEventListener('input',e=>{document.getElementById('aoL').innerHTML=draw(e.target.value.trim().toLowerCase())})};
+ ADMIN.students=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';const d=await LFAPI.j('/admin/students');const cs=L.visible();
+  const draw=q=>{const f=d.students.filter(u=>!q||(u.name+' '+u.email+' '+u.phone).toLowerCase().includes(q));return f.map(u=>`<div class="arow">${who(u.name,u.email,u.avatar)}<span class="meta">${esc(u.phone||'—')}</span><span class="meta" style="flex:1;text-align:right">${u.courses.length?u.courses.map(s=>`<span class="tag3 ok">${esc((cs.find(c=>c.s===s)||{t:s}).t)}</span>`).join(' '):'<span class="tag3">No course</span>'}</span>${u.role==='admin'?'<span class="tag3 pn">Admin</span>':''}</div>`).join('')||'<div class="empty3 sm"><b>No students found</b></div>'};
+  box.innerHTML=`<div class="adm-ov"><section class="cardp c8"><div class="atl"><h2>Students <small class="muted">${d.students.length}</small></h2><input type="search" id="asQ" placeholder="Search name, email or phone"></div><div id="asL">${draw('')}</div></section>
+   <section class="cardp c4"><h2>Give or remove access</h2><small class="muted" style="margin-top:-8px">For cash/UPI payments taken outside the site.</small><form class="fm one" id="aeF" novalidate><label>Student email<input type="email" required placeholder="student@gmail.com"></label><label>Course<select>${cs.map(c=>`<option value="${esc(c.s)}">${esc(c.t)}</option>`).join('')}</select></label><label>Action<select><option value="add">Give access</option><option value="remove">Remove access</option></select></label><div><button class="btn btn-main" type="submit">Save</button> <span class="amsg" id="aeM"></span></div></form></section></div>`;
+  document.getElementById('asQ').addEventListener('input',e=>{document.getElementById('asL').innerHTML=draw(e.target.value.trim().toLowerCase())});
+  const f=document.getElementById('aeF');f.addEventListener('submit',async e=>{e.preventDefault();const [em,sl,ac]=[...f.querySelectorAll('input,select')].map(x=>x.value.trim());const m=document.getElementById('aeM');try{await LFAPI.j('/admin/enroll',{method:'POST',body:JSON.stringify({email:em,slug:sl,action:ac})});m.textContent='Saved.';m.className='amsg ok';setTimeout(()=>ADMIN.students(box),800)}catch(err){m.textContent=err.message;m.className='amsg err'}})};
+ ADMIN.payouts=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';const d=await LFAPI.j('/admin/payouts');const pend=d.payouts.filter(p=>p.status==='pending'),rest=d.payouts.filter(p=>p.status!=='pending');
+  const row=(p,act)=>`<div class="arow" data-pid="${esc(p.id)}">${who(p.name,p.method==='bank'?`${p.account||'—'} · ${p.ifsc||''}`:(p.upi||'No UPI in KYC'),'')}<span class="meta">${dfull(new Date(p.d))} · ${p.method==='bank'?'Bank':'UPI'}</span><span class="amt3">${inr(p.amount)}</span>${act?`<span class="bs"><button type="button" class="ok" data-ps="paid">Mark paid</button><button type="button" class="no" data-ps="rejected">Reject</button></span>`:tagS(p.status)}</div>`;
+  box.innerHTML=`<div class="adm-ov"><section class="cardp c12"><div class="chd"><h2>Waiting for payment <small class="muted">${pend.length} · ${inr(pend.reduce((a,p)=>a+p.amount,0))}</small></h2></div><small class="muted" style="margin-top:-6px">Send the money from your bank or UPI app first, then press “Mark paid”. The student is notified instantly.</small>${pend.length?pend.map(p=>row(p,1)).join(''):'<div class="empty3 sm"><b>No pending requests</b><small>New withdrawal requests appear here.</small></div>'}</section>
+   <section class="cardp c12"><h2>History</h2>${rest.length?rest.map(p=>row(p,0)).join(''):'<div class="empty3 sm"><b>No payouts yet</b></div>'}</section></div>`;
+  box.querySelectorAll('[data-ps]').forEach(b=>b.addEventListener('click',async()=>{const id=b.closest('[data-pid]').dataset.pid;const st=b.dataset.ps;let note='';if(st==='rejected'){note=prompt('Reason for rejecting (the student will see this):','Please update your KYC details')||'';}b.disabled=true;try{await LFAPI.j('/admin/payouts/'+encodeURIComponent(id),{method:'POST',body:JSON.stringify({status:st,note})});ADMIN.payouts(box)}catch(e){b.disabled=false;alert(e.message)}}))};
+ ADMIN.kycs=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';const d=await LFAPI.j('/admin/kyc');
+  box.innerHTML=`<section class="cardp"><h2>KYC submissions <small class="muted">${d.kyc.filter(k=>k.status==='submitted').length} waiting</small></h2>${d.kyc.length?d.kyc.map(k=>`<div class="arow" data-kid="${esc(k.id)}">${who(k.name,'PAN '+(k.pan||'—'),'')}<span class="meta" style="flex:1">${esc(k.upi||'')}${k.account?` · A/c ${esc(k.account)} · ${esc(k.ifsc||'')}`:''}</span>${k.status==='submitted'?`<span class="bs"><button type="button" class="ok" data-ks="approved">Approve</button><button type="button" class="no" data-ks="rejected">Reject</button></span>`:tagS(k.status)}</div>`).join(''):'<div class="empty3 sm"><b>No KYC submissions yet</b></div>'}</section>`;
+  box.querySelectorAll('[data-ks]').forEach(b=>b.addEventListener('click',async()=>{const id=b.closest('[data-kid]').dataset.kid,st=b.dataset.ks;let note='';if(st==='rejected')note=prompt('Reason (the student will see this):','PAN details do not match')||'';b.disabled=true;try{await LFAPI.j('/admin/kyc/'+encodeURIComponent(id),{method:'POST',body:JSON.stringify({status:st,note})});ADMIN.kycs(box)}catch(e){b.disabled=false;alert(e.message)}}))};
+ window.__lfVerify=verify;
+}
+
+window.LFApp={show,verify:id=>window.__lfVerify&&window.__lfVerify(id),page(p){if(p==='packages')renderPackages();if(p==='jobs')renderJobs()},admin:ADMIN,reset(){const r=document.getElementById('app');if(r){r.innerHTML='';delete r.dataset.ready}}};
 plansHome();
 L.route();
 }

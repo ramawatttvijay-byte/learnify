@@ -81,6 +81,7 @@
     <div class="wbox wgrid">
       <div class="wmain">
         <div class="wstage" id="wStage">${playerHTML(l)}</div>
+        ${state.enrolled && ls.length && ls.every(x => state.done.has(x.i)) ? `<a class="wcert" href="#dash-certificates"><span>✓</span><div><b>Course complete</b><small>Your verified certificate is ready to download.</small></div><em>Get certificate →</em></a>` : ''}
         ${l ? `<div class="winfo">
           <div class="wmeta"><span class="wchip">Lesson ${pad(l.i + 1)} of ${pad(ls.length)}</span>${l.free && !state.enrolled ? '<span class="wchip wfree">Free preview</span>' : ''}${state.done.has(l.i) ? '<span class="wchip wdone">Completed</span>' : ''}</div>
           <h1>${esc(l.t)}</h1>

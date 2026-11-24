@@ -10,6 +10,8 @@ function match(doc, q) {
         if (op === '$in') return val.includes(x);
         if (op === '$gte') return x != null && cmp(x, val) >= 0;
         if (op === '$lt') return x != null && cmp(x, val) < 0;
+        if (op === '$gt') return x != null && cmp(x, val) > 0;
+        if (op === '$lte') return x != null && cmp(x, val) <= 0;
         throw new Error('op ' + op);
       });
     }

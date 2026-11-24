@@ -229,6 +229,44 @@ on('POST', '/progress', async ({ db, user, body }) => {
   return json({ done });
 }, { auth: true });
 
+/* ---------------- certificates ---------------- */
+const certId = (uid, slug) => 'LF-' + hmacHex(process.env.JWT_SECRET || 'lf', uid + ':' + slug).slice(0, 10).toUpperCase();
+on('GET', '/certificate/:slug', async ({ db, user, params }) => {
+  const slug = params.slug;
+  if (!(await isEnrolled(db, user._id, slug)) && user.role !== 'admin') throw httpError(403, 'Not enrolled');
+  const c = (await db.collection('courses').findOne({ _id: slug })) || DEFAULT_COURSES[slug];
+  if (!c) throw httpError(404, 'Course not found');
+  const n = (c.modules || []).length;
+  const prog = await db.collection('progress').findOne({ _id: `${user._id}:${slug}` });
+  const done = (prog?.done || []).filter(i => i < n).length;
+  if (!n || done < n) return json({ ready: false, done, total: n });
+  const id = certId(user._id, slug);
+  const ex = await db.collection('certificates').findOne({ _id: id });
+  const issued = ex?.issuedAt || prog.updatedAt || now();
+  if (!ex) await db.collection('certificates').insertOne({ _id: id, userId: user._id, name: user.name, slug, course: c.t, mentor: c.by || 'Learnify Mentors', issuedAt: issued });
+  return json({ ready: true, id, name: user.name, avatar: user.avatar || '', course: c.t, mentor: c.by || 'Learnify Mentors', issuedAt: issued, lessons: n });
+}, { auth: true });
+
+on('GET', '/verify/:id', async ({ db, params }) => {
+  const c = await db.collection('certificates').findOne({ _id: clean(params.id, 20).toUpperCase() });
+  if (!c) return json({ valid: false }, 404);
+  return json({ valid: true, id: c._id, name: c.name, course: c.course, issuedAt: c.issuedAt });
+});
+
+/* ---------------- live updates for the dashboard bell ---------------- */
+on('GET', '/pulse', async ({ db, user, url }) => {
+  const since = new Date(url.searchParams.get('since') || Date.now() - DAY);
+  const [cs, ps] = await Promise.all([
+    db.collection('commissions').find({ affiliateId: user._id, createdAt: { $gt: since } }).toArray(),
+    db.collection('payouts').find({ userId: user._id, doneAt: { $gt: since } }).toArray()
+  ]);
+  const items = [
+    ...cs.map(c => ({ t: 'sale', d: c.createdAt, title: 'New sale · +₹' + c.amount, body: `${c.buyerName} joined ${c.title}` })),
+    ...ps.map(p => ({ t: 'payout', d: p.doneAt, title: p.status === 'paid' ? 'Payout sent · ₹' + p.amount : 'Payout rejected', body: p.status === 'paid' ? 'Sent to your ' + (p.method === 'bank' ? 'bank account' : 'UPI') : (p.note || 'Please check your KYC details') }))
+  ].sort((a, b) => new Date(b.d) - new Date(a.d));
+  return json({ now: new Date().toISOString(), items });
+}, { auth: true });
+
 /* ---------------- payments (Razorpay) ---------------- */
 async function priceOf(db, kind, id) {
   if (kind === 'course') {
@@ -469,7 +507,32 @@ on('GET', '/admin/overview', async ({ db }) => {
     db.collection('kyc').countDocuments({ status: 'submitted' })
   ]);
   const sod = new Date(); sod.setHours(0, 0, 0, 0);
-  return json({ students: users, sales: orders.length, revenue: orders.reduce((a, o) => a + o.amount, 0), today: orders.filter(o => new Date(o.paidAt) >= sod).reduce((a, o) => a + o.amount, 0), pendingPayouts: payouts, pendingKyc: kyc });
+  const at = o => new Date(o.paidAt || o.createdAt);
+  const series = Array.from({ length: 30 }, (_, i) => {
+    const d0 = new Date(sod.getTime() - (29 - i) * DAY), d1 = new Date(d0.getTime() + DAY);
+    const day = orders.filter(o => at(o) >= d0 && at(o) < d1);
+    return { d: d0.toISOString(), v: day.reduce((a, o) => a + o.amount, 0), n: day.length };
+  });
+  const recent = orders.sort((a, b) => at(b) - at(a)).slice(0, 8);
+  const ppl = await peopleById(db, recent.map(o => o.userId));
+  const cs = await db.collection('commissions').find({ status: { $ne: 'cancelled' } }).toArray();
+  const byAff = {}; cs.forEach(c => { byAff[c.affiliateId] = (byAff[c.affiliateId] || 0) + c.amount; });
+  const topA = Object.entries(byAff).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const appl = await peopleById(db, topA.map(t => t[0]));
+  const byCourse = {}; orders.forEach(o => { byCourse[o.title] = (byCourse[o.title] || 0) + o.amount; });
+  const m30 = new Date(sod.getTime() - 29 * DAY), p30 = new Date(m30.getTime() - 30 * DAY);
+  const rev = (a, b) => orders.filter(o => at(o) >= a && at(o) < b).reduce((x, o) => x + o.amount, 0);
+  const newStudents = await db.collection('users').countDocuments({ createdAt: { $gte: m30 } });
+  return json({
+    students: users, newStudents, sales: orders.length, revenue: orders.reduce((a, o) => a + o.amount, 0),
+    today: orders.filter(o => at(o) >= sod).reduce((a, o) => a + o.amount, 0),
+    rev30: rev(m30, new Date(Date.now() + DAY)), revPrev30: rev(p30, m30),
+    commission: cs.reduce((a, c) => a + c.amount, 0),
+    pendingPayouts: payouts, pendingKyc: kyc, series,
+    recent: recent.map(o => ({ ...(ppl[o.userId] || person(null)), title: o.title, amount: o.amount, d: at(o) })),
+    topAffiliates: topA.map(([id, v]) => ({ ...(appl[id] || person(null)), v })),
+    byCourse: Object.entries(byCourse).sort((a, b) => b[1] - a[1]).map(([t, v]) => ({ t, v }))
+  });
 }, { admin: true });
 
 on('GET', '/admin/orders', async ({ db }) => json({ orders: (await db.collection('orders').find({}).sort({ createdAt: -1 }).limit(300).toArray()).map(o => ({ id: o._id, d: o.createdAt, name: o.userName, email: o.userEmail, title: o.title, amount: o.amount, status: o.status, paymentId: o.paymentId || '' })) }), { admin: true });

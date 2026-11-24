@@ -7,7 +7,7 @@
 <link rel="preload" as="image" href="hero-girl.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#ffffff" id="metaTheme">
 <script>(function(){var t;try{t=localStorage.getItem('lf_theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t;})()</script>
 <style>
@@ -542,11 +542,12 @@ footer nav a{text-decoration:none}
 @media(max-width:860px){.ftg{grid-template-columns:repeat(2,minmax(0,1fr))}.ftb{grid-column:1/-1}}
 
 </style>
-<link rel="stylesheet" href="css/app.css?v=202611241848">
-<script src="js/backend.js?v=202611241848"></script>
-<link rel="stylesheet" href="css/apple.css?v=202611241848">
-<link rel="stylesheet" href="css/watch.css?v=202611241848">
-<link rel="stylesheet" href="css/dash.css?v=202611241848">
+<link rel="stylesheet" href="css/app.css?v=202611241901">
+<script src="js/backend.js?v=202611241901"></script>
+<link rel="stylesheet" href="css/apple.css?v=202611241901">
+<link rel="stylesheet" href="css/watch.css?v=202611241901">
+<link rel="stylesheet" href="css/dash.css?v=202611241901">
+<link rel="stylesheet" href="css/pro.css?v=202611241901">
 </head>
 <body>
 
@@ -840,6 +841,7 @@ footer nav a{text-decoration:none}
 <section data-page="jobs" id="jobs"><div id="jobsRoot"></div></section>
 
 <section class="cdp" data-page="course" id="course"><div class="wrap" id="cdpWrap"></div></section>
+<section class="band" data-page="verify" id="verify" hidden><div class="wrap" id="verifyRoot"></div></section>
 <section data-page="watch" id="watch" hidden><div id="watchRoot"></div></section>
 <div class="mbar" id="mbar" hidden></div>
 <section class="adm" data-page="admin" id="admin">
@@ -847,7 +849,7 @@ footer nav a{text-decoration:none}
     <span class="kick">Learnify admin</span>
     <h1>Manage your website</h1>
     <p class="lead">Upload courses and lessons, add student reviews and team photos. Changes go live on the site as soon as you save.</p>
-    <div class="atabs" role="tablist"><button type="button" role="tab" data-t="courses" aria-selected="true">Courses &amp; lessons</button><button type="button" role="tab" data-t="reviews" aria-selected="false">Reviews</button><button type="button" role="tab" data-t="packages" aria-selected="false">Packages</button><button type="button" role="tab" data-t="jobs" aria-selected="false">Jobs</button><button type="button" role="tab" data-t="missions" aria-selected="false">Missions</button><button type="button" role="tab" data-t="settings" aria-selected="false">Team &amp; WhatsApp</button><button type="button" role="tab" data-t="social" aria-selected="false">Social links</button></div>
+    <div class="atabs" role="tablist"><button type="button" role="tab" data-t="overview" aria-selected="true">Overview</button><button type="button" role="tab" data-t="orders" aria-selected="false">Orders</button><button type="button" role="tab" data-t="students" aria-selected="false">Students</button><button type="button" role="tab" data-t="payouts" aria-selected="false">Payouts</button><button type="button" role="tab" data-t="kycs" aria-selected="false">KYC</button><button type="button" role="tab" data-t="courses" aria-selected="false">Courses &amp; lessons</button><button type="button" role="tab" data-t="reviews" aria-selected="false">Reviews</button><button type="button" role="tab" data-t="packages" aria-selected="false">Packages</button><button type="button" role="tab" data-t="jobs" aria-selected="false">Jobs</button><button type="button" role="tab" data-t="missions" aria-selected="false">Missions</button><button type="button" role="tab" data-t="settings" aria-selected="false">Team &amp; WhatsApp</button><button type="button" role="tab" data-t="social" aria-selected="false">Social links</button></div>
     <div id="admBody"></div>
   </div>
 </section>
@@ -1042,7 +1044,7 @@ document.getElementById('vdX').addEventListener('click',()=>document.getElementB
 document.getElementById('vd').addEventListener('close',()=>{const v=document.getElementById('vdV');v.pause();v.removeAttribute('src');v.load();document.getElementById('vdF').src='about:blank'});
 
 /* ===== Admin ===== */
-let aTab='courses',aSel=null,draft=null;
+let aTab=window.LFAPI?'overview':'courses',aSel=null,draft=null;
 const MAXB=20*1024*1024;
 function msg(id,t,ok){const el=document.getElementById(id);if(!el)return;el.textContent=t;el.className='amsg '+(ok?'ok':'err')}
 async function upload(file,msgId){
@@ -1191,6 +1193,7 @@ function route(){
   if(h.startsWith('dash-learn-')){location.replace('#watch-'+h.slice(11));return}
   let page=pages.includes(h)?h:null, target=null;
   const wt=h.match(/^watch-([a-z0-9-]+)(?:\/(\d+))?$/);if(wt)page='watch';
+  const vf=h.match(/^verify-(LF-[0-9A-Fa-f]{10})$/);if(vf)page='verify';
   if(/^dash-[a-z0-9-]+$/.test(h))page='dashboard';
   if(page==='dashboard'&&!getUser()){if(window.LFAPI&&!LFAPI.isReady){LFAPI.ready.then(route);return}location.hash='#login';return}
   if(page==='login'&&getUser()){location.hash='#dashboard';return}
@@ -1207,6 +1210,7 @@ function route(){
   document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('act',a.dataset.nav===page));
   if(page==='dashboard'&&window.LFApp)LFApp.show(h==='dashboard'?'dashboard':h);
   if(page==='watch'&&window.LFWatch)LFWatch.show(wt[1],+wt[2]||0);
+  if(page==='verify'&&window.LFApp&&LFApp.verify)LFApp.verify(vf[1]);
   if((page==='packages'||page==='jobs')&&window.LFApp)LFApp.page(page);
   if(target&&!pages.includes(h)&&page!=='dashboard'){requestAnimationFrame(()=>target.scrollIntoView())}else{window.scrollTo(0,0)}
 }
@@ -1269,8 +1273,8 @@ document.getElementById('lf').addEventListener('submit',e=>{
 </script>
 
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll(".stack td:not([data-l])")){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest("table").rows[0].cells[i]?.textContent||""}}).observe(document,{childList:true,subtree:true})</script>
-<script src="js/app.js?v=202611241848"></script>
-<script src="js/watch.js?v=202611241848"></script>
-<script src="js/apple.js?v=202611241848"></script>
+<script src="js/app.js?v=202611241901"></script>
+<script src="js/watch.js?v=202611241901"></script>
+<script src="js/apple.js?v=202611241901"></script>
 </body>
 </html>
