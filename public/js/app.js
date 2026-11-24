@@ -482,7 +482,7 @@ if(LIVE){
  function badge(){const n=unread(),b=document.getElementById('bellN');if(b){b.hidden=!n;b.textContent=n>9?'9+':n}}
  function stack(){let s=document.getElementById('lfStack');if(!s){s=document.createElement('div');s.id='lfStack';s.setAttribute('aria-live','polite');document.body.appendChild(s)}return s}
  function toast2(it){const el=document.createElement('div');el.className='lft';el.innerHTML=`<span class="nti">${I(ICN[it.t]||ICN.sale)}</span><div><b>${esc(it.title)}</b><small>${esc(it.body)}</small></div>`;stack().appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),300)},5200)}
- function panel(){const sp=document.querySelector('#mainp .ptop .sp');if(!sp)return;let p=document.getElementById('ntp');if(p){p.remove();NT.open=false;return}
+ function panel(){const sp=document.querySelector('#mainp .ptop .sp, #mainp .cfsp');if(!sp)return;let p=document.getElementById('ntp');if(p){p.remove();NT.open=false;return}
   p=document.createElement('div');p.id='ntp';p.className='ntp';p.setAttribute('role','dialog');p.setAttribute('aria-label','Notifications');
   p.innerHTML=`<header><b>Notifications</b>${NT.items.length?'<button type="button" id="ntAll">Mark all as read</button>':''}</header>${NT.items.length?`<ul>${NT.items.slice(0,20).map(x=>`<li class="${new Date(x.d).getTime()>NT.seen?'new':''}"><span class="nti ${x.t}">${I(ICN[x.t]||ICN.sale)}</span><div><b>${esc(x.title)}</b><small>${esc(x.body)}</small><time>${agoTxt(new Date(x.d))}</time></div></li>`).join('')}</ul>`:`<div class="ntx">You're all caught up.<br>New sales and payouts show up here.</div>`}<footer><a href="#dash-notifications">View all activity</a></footer>`;
   sp.appendChild(p);NT.open=true;const a=document.getElementById('ntAll');if(a)a.addEventListener('click',markRead);
@@ -557,6 +557,49 @@ if(LIVE){
   box.innerHTML=`<section class="cardp"><h2>KYC submissions <small class="muted">${d.kyc.filter(k=>k.status==='submitted').length} waiting</small></h2>${d.kyc.length?d.kyc.map(k=>`<div class="arow" data-kid="${esc(k.id)}">${who(k.name,'PAN '+(k.pan||'—'),'')}<span class="meta" style="flex:1">${esc(k.upi||'')}${k.account?` · A/c ${esc(k.account)} · ${esc(k.ifsc||'')}`:''}</span>${k.status==='submitted'?`<span class="bs"><button type="button" class="ok" data-ks="approved">Approve</button><button type="button" class="no" data-ks="rejected">Reject</button></span>`:tagS(k.status)}</div>`).join(''):'<div class="empty3 sm"><b>No KYC submissions yet</b></div>'}</section>`;
   box.querySelectorAll('[data-ks]').forEach(b=>b.addEventListener('click',async()=>{const id=b.closest('[data-kid]').dataset.kid,st=b.dataset.ks;let note='';if(st==='rejected')note=prompt('Reason (the student will see this):','PAN details do not match')||'';b.disabled=true;try{await LFAPI.j('/admin/kyc/'+encodeURIComponent(id),{method:'POST',body:JSON.stringify({status:st,note})});ADMIN.kycs(box)}catch(e){b.disabled=false;alert(e.message)}}))};
  window.__lfVerify=verify;
+}
+
+/* ---------- v6: CareerFixx-grade dashboard home ---------- */
+{
+ const ic=p=>I(p);
+ const IX={chart:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',link:IC.link,target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',rupee:'<path d="M6 4h12M6 9h12M14 4c3 0 4 2.5 4 5s-2 5-6 5H7l8 7"/>',award:IC.cert,pie:'<path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',wal:IC.wal,dl:'<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>',copy:'<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>'};
+ const COL=['#5b2bf5','#f97316','#0e0e13','#ec4899','#64748b','#14b8a6'];
+ function donut(parts,total){const R=70,C=2*Math.PI*R;let off=0;
+  return `<svg viewBox="0 0 200 200" class="dnt" aria-hidden="true">${parts.map((p,i)=>{const len=total?p.v/total*C:0,s=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="${COL[i%COL.length]}" stroke-width="34" stroke-dasharray="${len} ${C-len}" stroke-dashoffset="${-off}" style="--i:${i}"/>`;off+=len;return s}).join('')}</svg>`}
+ VIEWS.dashboard=()=>{
+  const u=user(),lv=(()=>{let i=MILES.findIndex(m=>ME.all<m.amt);if(i<0)i=MILES.length-1;return{i,nx:MILES[i],pct:Math.min(100,Math.round(ME.all/MILES[i].amt*100))}})();
+  const goal=ME.goal||10000,gp=Math.min(100,Math.round((ME.m||0)/goal*100));
+  const since=new Date(Date.now()-182*864e5),six=SALES.filter(x=>x.d>=since&&x.st!=='Cancelled');const by={};six.forEach(x=>by[x.course]=(by[x.course]||0)+1);
+  const parts=Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([t,v])=>({t,v}));
+  const own=(LIVE?LFAPI.enrolled():[]);const c0=L.visible().find(c=>own.includes(c.s));
+  return `<div class="cfx">
+  <section class="cfh"><div class="cfa">${avatar(u.name,u.avatar,'xl')}</div><div class="cfn"><h1>${esc(u.name)}</h1><p>${esc(maskE(u.email))}</p><small class="muted">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</small></div>
+   <div class="cfr"><span class="cfbadge">${esc(ME.pkg)}</span><button type="button" class="btn btn-main" id="dlRep">${ic(IX.dl)}<span>Download report</span></button><span class="sp cfsp">${LIVE?`<button class="bell" type="button" id="bellB" aria-label="Notifications">${I(IC.bell)}<span class="bn" id="bellN" hidden></span></button>`:''}</span><button class="sbtn" type="button" id="sbtn" aria-label="Open menu">${I(IC.menu)}</button></div></section>
+  ${SAMPLE}
+  <div class="cfk"><div class="k0"><small>Today's</small><b data-cu="${ME.today||0}">${inr(ME.today||0)}</b><em>${ME.todayN||0} sales</em></div><div class="k1"><small>Last 7 days</small><b data-cu="${ME.w||0}">${inr(ME.w||0)}</b><em>${ME.wN||0} sales</em></div><div class="k2"><small>Last 30 days</small><b data-cu="${ME.m||0}">${inr(ME.m||0)}</b><em>${ME.mN||0} sales</em></div><div class="k3"><small>All time</small><b data-cu="${ME.all||0}">${inr(ME.all||0)}</b><em>Total earned</em></div></div>
+  <div class="cfg">
+   <section class="cfc cf-chart"><h2>${ic(IX.chart)}Last 7 day commission</h2>${areaChart(WEEK,{h:400,id:'ern'})}</section>
+   <div class="cfcol">
+    <section class="cfc"><h2>${ic(IX.link)}Affiliate link</h2><div class="cfl"><code>${esc(refCode().toUpperCase())}</code><button type="button" class="cfcp" data-copy-qa="${esc(refUrl())}" aria-label="Copy affiliate link">${ic(IX.copy)}</button></div><small class="muted">Copy button copies your full link · ${inr(ME.comm||625)} per sale</small></section>
+    <section class="cfc"><h2>${ic(IX.target)}Monthly goal</h2><div class="cft"><span>Target</span><b>${inr(goal)}</b></div><div class="cfbar"><i style="--w:${gp}%"></i></div><small class="muted">${gp}% reached · ${inr(Math.max(0,goal-(ME.m||0)))} to go</small></section>
+    <section class="cfc"><h2>${ic(IX.rupee)}Remaining balance</h2><a class="cfbal" href="#dash-payouts"><small>Available for withdrawal</small><b data-cu="${ME.bal||0}">${inr(ME.bal||0)}</b><em>Pending ${inr(ME.pending||0)} · Withdraw →</em></a></section>
+   </div>
+  </div>
+  <section class="cfc cfm"><div class="cfmh"><h2>${ic(IX.award)}Milestones &amp; rewards</h2><span class="cfach">${MILES.filter(m=>ME.all>=m.amt).length}/${MILES.length} achieved</span></div>
+   <a class="cfms" href="#dash-milestones">${ring(lv.pct,lv.pct+'%',64)}<div class="cfmi"><small>Next milestone</small><b>${esc(lv.nx.t)} · ${inr(lv.nx.amt)}</b><span>Earn ${inr(Math.max(0,lv.nx.amt-ME.all))} more to win ${esc(lv.nx.rw.toLowerCase())}</span><div class="cfmb"><i style="--w:${lv.pct}%"></i></div><div class="cfmf"><em>${inr(ME.all||0)} earned</em><em>Goal ${inr(lv.nx.amt)}</em></div></div><span class="cfmbtn">View milestones →</span></a></section>
+  <div class="cfg2">
+   <section class="cfc"><h2>${ic(IX.pie)}Last 6 month sales</h2>${parts.length?`<div class="cfd">${donut(parts,six.length)}<div class="cfdc"><small>Total sales</small><b>${six.length}</b></div></div><ul class="cflg">${parts.map((p,i)=>`<li><i style="background:${COL[i%COL.length]}"></i>${esc(p.t)}<b>${p.v}</b></li>`).join('')}</ul>`:`<div class="empty3">${I(IC.team)}<b>No sales in the last 6 months</b><small>Share your link to make your first sale.</small></div>`}</section>
+   <section class="cfc"><div class="cfmh"><h2>${ic(IX.list)}Recent sales</h2><a class="mut2" href="#dash-team">See all</a></div>${SALES.length?`<div class="cftw"><table class="cft2"><thead><tr><th>Date</th><th>Name</th><th>Course</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody>${SALES.slice(0,8).map(x=>`<tr><td>${dfull(x.d)}</td><td><span class="who">${avatar(x.name,x.av)}<span class="wn"><b>${esc(x.name)}</b>${x.em?`<small>${esc(x.em)}</small>`:''}</span></span></td><td>${esc(x.course)}</td><td class="r">${inr(x.amt)}</td><td>${stTag(x.st)}</td></tr>`).join('')}</tbody></table></div>`:`<div class="empty3">${I(IC.list||IC.team)}<b>No sales yet</b><small>When someone buys with your link it shows up here.</small></div>`}</section>
+  </div>
+  <section class="cfc"><div class="cfmh"><h2>${ic(IX.wal)}Payout history</h2><a class="mut2" href="#dash-payouts">Withdraw</a></div>${PAYOUTS.length?`<div class="cftw"><table class="cft2"><thead><tr><th>#</th><th>Date</th><th>Mode</th><th class="r">Amount</th><th>Status</th></tr></thead><tbody>${PAYOUTS.map((p,i)=>`<tr><td>${i+1}</td><td>${dfull(p[0])}</td><td>${esc(p[2])}</td><td class="r">${inr(p[1])}</td><td>${stTag(p[3])}</td></tr>`).join('')}</tbody></table></div>`:`<p class="muted cfnone">No payouts yet. Earnings become available 7 days after a sale, and payouts go out every Monday.</p>`}</section>
+  ${c0?`<a class="cfcont" href="#watch-${esc(c0.s)}"><span class="cpl">${I('<path d="M8 5v14l11-7z" fill="currentColor"/>')}</span><div><small>Continue learning</small><b>${esc(c0.t)}</b></div><em>Open course →</em></a>`:''}
+ </div>`};
+ AFTER.dashboard=()=>{
+  document.querySelectorAll('[data-copy-qa]').forEach(b=>b.addEventListener('click',()=>{try{navigator.clipboard.writeText(b.dataset.copyQa).then(()=>{b.classList.add('ok');setTimeout(()=>b.classList.remove('ok'),1600)})}catch(e){}}));
+  const sb=document.getElementById('sbtn');if(sb)sb.addEventListener('click',()=>{document.getElementById('side2').classList.add('open');document.getElementById('scrim').classList.add('open')});
+  const d=document.getElementById('dlRep');if(d)d.addEventListener('click',()=>{const rows=[['Type','Date','Name','Course / Mode','Amount (INR)','Status'],...SALES.map(x=>['Commission',dfull(x.d),x.name,x.course,x.amt,x.st]),...PAYOUTS.map(p=>['Payout',dfull(p[0]),'',p[2],-p[1],p[3]])];
+   const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download=`learnify-earnings-${new Date().toISOString().slice(0,10)}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+  requestAnimationFrame(()=>document.querySelectorAll('.cfm .rfg').forEach(r=>r.classList.add('go')))};
 }
 
 window.LFApp={show,verify:id=>window.__lfVerify&&window.__lfVerify(id),page(p){if(p==='packages')renderPackages();if(p==='jobs')renderJobs()},admin:ADMIN,reset(){const r=document.getElementById('app');if(r){r.innerHTML='';delete r.dataset.ready}}};
