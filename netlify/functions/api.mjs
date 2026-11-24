@@ -1,6 +1,6 @@
-// Learnify API — one Netlify Function that serves every /api/* route.
+// Learnify API: one handler for every /api/* route (Cloudflare Worker via worker.mjs, or Netlify Function).
 import {
-  getDb, newId, now, httpError, json, hashPassword, checkPassword, signToken, verifyToken,
+  getDb, newId, now, httpError, json, hashPassword, checkPassword, needsRehash, signToken, verifyToken,
   sessionCookie, clearCookie, readCookie, hmacHex, safeEqual, isEmail, clean, isHttps, driveId
 } from './lib/core.mjs';
 
@@ -92,7 +92,7 @@ on('POST', '/auth/signup', async ({ body, db }) => {
   const ref = clean(body.ref, 20).toUpperCase();
   if (ref) { const r = await db.collection('users').findOne({ code: ref }); if (r) referredBy = r._id; }
   const user = {
-    _id: newId('u_'), name, email, phone, passwordHash: hashPassword(password),
+    _id: newId('u_'), name, email, phone, passwordHash: await hashPassword(password),
     role: adminList().includes(email) ? 'admin' : 'student', code: await makeCode(db, name),
     referredBy, sv: 0, createdAt: now()
   };
@@ -105,7 +105,7 @@ on('POST', '/auth/login', async ({ body, db }) => {
   const email = clean(body.email, 120).toLowerCase();
   const user = await db.collection('users').findOne({ email });
   if (user?.lockUntil && new Date(user.lockUntil) > now()) throw httpError(429, 'Too many tries. Please wait 15 minutes.');
-  if (!user || !checkPassword(String(body.password || ''), user.passwordHash)) {
+  if (!user || !(await checkPassword(String(body.password || ''), user.passwordHash))) {
     if (user) {
       const fails = (user.fails || 0) + 1;
       await db.collection('users').updateOne({ _id: user._id }, { $set: { fails, lockUntil: fails >= 5 ? new Date(Date.now() + 15 * 60e3) : null } });
@@ -113,7 +113,9 @@ on('POST', '/auth/login', async ({ body, db }) => {
     throw httpError(401, 'Wrong email or password');
   }
   const role = adminList().includes(email) ? 'admin' : (user.role === 'admin' ? 'admin' : 'student');
-  await db.collection('users').updateOne({ _id: user._id }, { $set: { fails: 0, lockUntil: null, role } });
+  const upd = { fails: 0, lockUntil: null, role };
+  if (needsRehash(user.passwordHash)) upd.passwordHash = await hashPassword(String(body.password));
+  await db.collection('users').updateOne({ _id: user._id }, { $set: upd });
   user.role = role;
   const cookie = await startSession(db, user);
   return json({ user: publicUser(user) }, 200, { 'set-cookie': cookie });
@@ -137,9 +139,9 @@ on('PUT', '/me', async ({ db, user, body }) => {
 }, { auth: true });
 
 on('POST', '/me/password', async ({ db, user, body }) => {
-  if (!checkPassword(String(body.current || ''), user.passwordHash)) throw httpError(400, 'Current password is wrong');
+  if (!(await checkPassword(String(body.current || ''), user.passwordHash))) throw httpError(400, 'Current password is wrong');
   if (String(body.next || '').length < 8) throw httpError(400, 'New password must be at least 8 characters');
-  await db.collection('users').updateOne({ _id: user._id }, { $set: { passwordHash: hashPassword(body.next) } });
+  await db.collection('users').updateOne({ _id: user._id }, { $set: { passwordHash: await hashPassword(body.next) } });
   return json({ ok: true });
 }, { auth: true });
 

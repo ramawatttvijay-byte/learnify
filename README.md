@@ -115,3 +115,16 @@ Dhyan rakho (sach bata raha hoon):
 - `npm test` — backend ke tests (in-memory database ke saath, internet ki zaroorat nahi)
 - Commission (default ₹625), hold period (7 din), minimum withdraw (₹500): MongoDB ke `site` collection mein `settings` document se badal sakte ho
 - Passwords scrypt se hash hote hain; login cookie HttpOnly + Secure hai
+
+---
+
+## Cloudflare (main hosting from 1 December)
+
+Free plan, selling allowed, no "Powered by" badge. Same code, same database.
+
+- `worker.mjs` — Cloudflare entry. Pages and images come from `public/` (free, unlimited); `/api/*` goes to one Durable Object that keeps the MongoDB connection open.
+- `wrangler.jsonc` — Cloudflare settings. `public/_headers` — security and cache headers.
+- Secrets (Cloudflare → Workers → learnify → Settings → Variables and Secrets):
+  `MONGODB_URI`, `JWT_SECRET`, `ADMIN_EMAILS`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`
+- Auto-update: Cloudflare → Workers → learnify → Settings → Build → connect GitHub repo `learnify`, branch `main`. Every push redeploys.
+- Razorpay webhook URL after the move: `https://<your-domain>/api/pay/webhook`

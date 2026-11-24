@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "learnify",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
+  },
+  "durable_objects": {
+    "bindings": [{ "name": "API", "class_name": "Api" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Api"] }],
+  "vars": { "MONGODB_DB": "learnify" },
+  "observability": { "enabled": true }
+}

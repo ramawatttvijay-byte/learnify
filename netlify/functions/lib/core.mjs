@@ -24,19 +24,30 @@ export function json(data, status = 200, headers = {}) {
   return new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
 }
 
-/* ---------------- passwords (scrypt, no extra package) ---------------- */
-export function hashPassword(pw) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.scryptSync(pw, salt, 64).toString('hex');
-  return `s1$${salt}$${hash}`;
+/* ---------------- passwords ----------------
+   New hashes: PBKDF2-SHA256 through Web Crypto ("p1$iterations$salt$hash"). It runs natively
+   on both Netlify (Node) and Cloudflare Workers, so login stays fast on the free CPU budget.
+   Old scrypt hashes ("s1$salt$hash") still verify, and are upgraded on the next login. */
+const PW_ITER = () => Math.min(100000, Math.max(10000, Number(process.env.PW_ITER) || 60000));
+async function pbkdf2(pw, saltHex, iter) {
+  const key = await globalThis.crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const bits = await globalThis.crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: Buffer.from(saltHex, 'hex'), iterations: iter }, key, 256);
+  return Buffer.from(bits);
 }
-export function checkPassword(pw, stored) {
-  if (!stored || !stored.startsWith('s1$')) return false;
-  const [, salt, hash] = stored.split('$');
-  const got = crypto.scryptSync(pw, salt, 64);
-  const want = Buffer.from(hash, 'hex');
+export async function hashPassword(pw) {
+  const salt = crypto.randomBytes(16).toString('hex'), iter = PW_ITER();
+  return `p1$${iter}$${salt}$${(await pbkdf2(String(pw), salt, iter)).toString('hex')}`;
+}
+export async function checkPassword(pw, stored) {
+  if (!stored) return false;
+  const parts = String(stored).split('$');
+  let got, want;
+  if (parts[0] === 'p1' && parts.length === 4) { want = Buffer.from(parts[3], 'hex'); got = await pbkdf2(String(pw), parts[2], Number(parts[1])); }
+  else if (parts[0] === 's1' && parts.length === 3) { want = Buffer.from(parts[2], 'hex'); got = crypto.scryptSync(String(pw), parts[1], 64); }
+  else return false;
   return got.length === want.length && crypto.timingSafeEqual(got, want);
 }
+export const needsRehash = stored => !String(stored || '').startsWith('p1$');
 
 /* ---------------- signed session tokens (JWT, HS256) ---------------- */
 const b64u = b => Buffer.from(b).toString('base64url');
