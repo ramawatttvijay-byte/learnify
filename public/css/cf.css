@@ -16,3 +16,66 @@ h1,h2,h3{font-family:var(--hd);letter-spacing:-.02em;font-weight:600}
 .dash2 .hbig,.dash2 .wamt,.dash2 .msi b{letter-spacing:-.025em}
 .dash2 .tbtn+.tbtn{margin-left:0}
 @media(max-width:900px){.dash2 #dlRep span{display:none}}
+
+/* ---------- dashboard: welcome card with photo ---------- */
+.dash2 .wel{position:relative;display:flex;align-items:center;gap:20px;padding:22px 24px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(14,14,19,.04);overflow:hidden;isolation:isolate;flex-wrap:wrap}
+.dash2 .wel::after{content:"";position:absolute;right:-120px;top:-160px;width:420px;height:420px;border-radius:50%;background:radial-gradient(closest-side,rgba(166,14,239,.10),rgba(75,31,245,.05) 55%,transparent 75%);z-index:-1;pointer-events:none}
+.dash2 .wav{position:relative;flex:none;padding:3px;border-radius:50%;background:conic-gradient(from 200deg,#4b1ff5,#a60eef,#ff0a8c,#ffb400,#4b1ff5);text-decoration:none}
+.dash2 .wav .avx.xl{width:72px;height:72px;box-shadow:0 0 0 3px var(--card)}
+.dash2 .wav .avx.xl b{font-size:24px}
+.dash2 .wcam{position:absolute;right:-2px;bottom:-2px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:var(--card);box-shadow:0 0 0 3px var(--card);opacity:0;transform:scale(.8);transition:opacity .2s,transform .2s}
+.dash2 .wcam svg{width:13px;height:13px}
+.dash2 .wav:hover .wcam,.dash2 .wav:focus-visible .wcam{opacity:1;transform:none}
+.dash2 .wid{flex:1;min-width:200px;display:grid;gap:2px}
+.dash2 .wid small{font:500 12.5px var(--ui);color:var(--mute)}
+.dash2 .wid h1{font:600 24px/1.2 var(--ui);letter-spacing:-.02em}
+.dash2 .wid p{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:2px}
+.dash2 .wid .eml{font:400 13px var(--mono);color:var(--mute)}
+.dash2 .wid .pk{margin:0}
+.dash2 .wact{display:flex;align-items:center;gap:10px}
+.dash2 .wact .sp{position:relative;display:inline-flex}
+.dash2 .wel .sbtn{display:none}
+
+/* ---------- dashboard: 4 KPI tiles in logo colours ---------- */
+.dash2 .kt{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.dash2 .ktl{--c:#4b1ff5;position:relative;display:grid;gap:2px;padding:18px 18px 16px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(14,14,19,.04);overflow:hidden;isolation:isolate;transition:transform .3s var(--ease),box-shadow .3s,border-color .3s;animation:rin .5s var(--ease) both}
+.dash2 .ktl:nth-child(2){--c:#a60eef;animation-delay:60ms}.dash2 .ktl:nth-child(3){--c:#ff0a8c;animation-delay:120ms}.dash2 .ktl:nth-child(4){--c:#e09a00;animation-delay:180ms}
+.dash2 .ktl::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--c)}
+.dash2 .ktl::after{content:"";position:absolute;right:-50px;top:-50px;width:140px;height:140px;border-radius:50%;background:radial-gradient(closest-side,color-mix(in srgb,var(--c) 14%,transparent),transparent);z-index:-1}
+.dash2 .ktl:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--c) 35%,var(--line));box-shadow:0 14px 30px -22px color-mix(in srgb,var(--c) 70%,transparent)}
+.dash2 .kti{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 12%,transparent);color:var(--c);margin-bottom:10px}
+.dash2 .kti svg{width:17px;height:17px}
+.dash2 .ktl small{font:500 13px var(--ui);color:var(--mute)}
+.dash2 .ktl b{font:600 26px/1.15 var(--ui);letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.dash2 .ktl em{font-style:normal;font:500 12px var(--ui);color:var(--c)}
+.dash2 .ktl:first-child{background:#0e0d16;border-color:#1d1b2b}
+.dash2 .ktl:first-child small{color:rgba(255,255,255,.6)}.dash2 .ktl:first-child b{color:#fff}
+.dash2 .ktl:first-child .kti{background:rgba(255,255,255,.08);color:#b9a6ff}.dash2 .ktl:first-child em{color:#b9a6ff}
+.dash2 .ktl:first-child::before{background:linear-gradient(#4b1ff5,#a60eef)}
+[data-theme="dark"] .dash2 .ktl:first-child{background:linear-gradient(160deg,#1c1638,#111117)}
+
+/* wallet card fills the row next to the chart */
+.dash2 .dg>.c4>.walc{height:100%}
+.dash2 .lvl.c8{grid-column:span 8}
+
+@media(max-width:1180px){.dash2 .lvl.c8{grid-column:1/-1}}
+@media(max-width:1100px){.dash2 .kt{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:900px){
+ .dash2 .wel{padding:18px;gap:14px}
+ .dash2 .wel .sbtn{display:grid;position:absolute;right:14px;top:14px}
+ .dash2 .wav .avx.xl{width:56px;height:56px}.dash2 .wav .avx.xl b{font-size:19px}
+ .dash2 .wid{padding-right:48px}
+ .dash2 .wid h1{font-size:19px}
+ .dash2 .wact{width:100%}
+ .dash2 .wact .tbtn{flex:1;justify-content:center}
+ .dash2 #dlRep span{display:inline}
+ .dash2 .wcam{opacity:1;transform:none}
+}
+@media(max-width:560px){.dash2 .kt{gap:10px}.dash2 .ktl{padding:14px}.dash2 .ktl b{font-size:19px}.dash2 .kti{width:30px;height:30px;margin-bottom:6px}}
+@media(max-width:900px){
+ .dash2 .wact{flex-wrap:nowrap;gap:8px}
+ .dash2 .wact .tbtn{width:auto;padding:0 12px;border-radius:var(--rs)}
+ .dash2 .wact .tbtn span{display:inline!important}
+ .dash2 .wact .sp{flex:none}
+ .dash2 .wid small{font-size:12px}
+}
