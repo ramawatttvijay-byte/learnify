@@ -144,8 +144,8 @@
 .cpl{position:absolute;left:50%;top:50%;width:56px;height:56px;border-radius:50%;transform:translate(-50%,-50%);display:grid;place-items:center;background:rgba(255,255,255,.92);color:#4b1ff5;box-shadow:0 12px 30px -8px rgba(0,0,0,.5);transition:transform .35s var(--ease)}
 .cpl svg{width:22px;height:22px;margin-left:3px}
 .ccl:hover .cpl,.mth:hover .cpl{transform:translate(-50%,-50%) scale(1.1)}
-.cpl::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,255,255,.6);animation:pulse 2.2s ease-out infinite}
-@keyframes pulse{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
+.cpl::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,255,255,.6);animation:lfpulse 2.2s ease-out infinite}
+@keyframes lfpulse{from{transform:scale(.9);opacity:1}to{transform:scale(1.35);opacity:0}}
 .crw{display:flex;align-items:center;gap:14px}
 .crw b{display:block;font:600 16px var(--hd);line-height:1.25}
 .cont .btn{width:100%}
