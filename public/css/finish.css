@@ -1,0 +1,62 @@
+/* ===================================================================
+   Learnify · site finishing (loads last)
+   Consistent type scale, calmer tiles, clean icons, fixed edge cases.
+   =================================================================== */
+/* display type: Poppins semibold, tight but readable */
+.atitle,.ahead h2,.phead h1,.jhero h1,.cdp h1,.afaq h2,.final h2{font-weight:600!important;letter-spacing:-.035em!important}
+.ahead h2,.afaq h2{line-height:1.08}
+.asub,.lead{font-weight:400}
+.kick{font-weight:600}
+
+/* "Live / Recordings / Homework / Doubt / Hinglish" tiles: compact, icon chips */
+.atile{border-radius:24px;border:1px solid var(--line);}
+.atile:not(.t-wide){min-height:0;gap:18px;padding:28px 26px;align-items:flex-start;text-align:left;border:1px solid var(--line);box-shadow:0 1px 2px rgba(14,14,19,.03)}
+.atile h3{font-size:clamp(20px,1.7vw,24px)!important;letter-spacing:-.02em;font-weight:600}
+.atile p{font-size:15px;margin-top:6px}
+.atile .att{order:2}
+.aico{order:1;width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,#5b1ff3 9%,transparent);color:#5b1ff3}
+[data-theme="dark"] .aico{color:#b896ff;background:rgba(124,92,255,.14)}
+.aico svg{width:26px;height:26px}
+.ahin2{font:600 20px var(--hd);gap:0;display:flex;align-items:baseline;justify-content:center}
+.ahin2 i{font-style:normal;font-size:15px;margin-left:2px;opacity:.75}
+.atile:hover{transform:translateY(-3px);box-shadow:0 20px 40px -30px var(--sh)}
+.atile .abig{display:none}
+
+/* live demo chat: readable on purple */
+.w4chat p{color:#fff}
+.w4chat .q{color:rgba(255,255,255,.88)}
+.w4chat .a{background:linear-gradient(135deg,#5b1ff3,#a60eef)}
+
+/* course syllabus: one clean lock instead of grey dots */
+.syl .pll{color:var(--mute);opacity:.75}
+.syl .pll svg{width:15px;height:15px}
+
+/* FAQ intro link sits under the text, not centred */
+.afaq .alinks{justify-content:flex-start}
+
+/* team badges stay inside their cards */
+.mate{position:relative}
+.mate .chip{position:static}
+.mtxt .chip{margin-bottom:4px}
+
+/* pricing small print */
+.pz2 small,.pkg .pz2 small{font-size:13px!important;letter-spacing:0!important;white-space:nowrap}
+
+/* cards everywhere: one border + shadow language */
+.cdbox,.cds,.plan,.pkg,.amt,.mate,.jcard{box-shadow:0 1px 2px rgba(14,14,19,.04),0 18px 40px -36px rgba(14,14,19,.35)}
+
+/* buttons: same height and weight everywhere on the site */
+.btn{font-weight:600;letter-spacing:-.005em}
+
+/* nav: crisper */
+nav[aria-label="Main"] a{font-weight:500}
+
+@media(max-width:700px){
+ .atile:not(.t-wide){padding:22px 20px;gap:14px;flex-direction:row;align-items:center}
+ .atile .att{order:2}
+ .aico{width:46px;height:46px;flex:none}
+ .atile h3{font-size:19px!important}
+ .atile p{font-size:14px;margin-top:2px}
+}
+.atile.t-wide h3{font-size:clamp(26px,2.6vw,34px)!important}
+.atile.t-wide .att{order:0}

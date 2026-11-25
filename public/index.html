@@ -542,13 +542,14 @@ footer nav a{text-decoration:none}
 @media(max-width:860px){.ftg{grid-template-columns:repeat(2,minmax(0,1fr))}.ftb{grid-column:1/-1}}
 
 </style>
-<link rel="stylesheet" href="css/app.css?v=202611241923">
-<script src="js/backend.js?v=202611241923"></script>
-<link rel="stylesheet" href="css/apple.css?v=202611241923">
-<link rel="stylesheet" href="css/watch.css?v=202611241923">
-<link rel="stylesheet" href="css/dash.css?v=202611241923">
-<link rel="stylesheet" href="css/pro.css?v=202611241923">
-<link rel="stylesheet" href="css/cf.css?v=202611241923">
+<link rel="stylesheet" href="css/app.css?v=202611241931">
+<script src="js/backend.js?v=202611241931"></script>
+<link rel="stylesheet" href="css/apple.css?v=202611241931">
+<link rel="stylesheet" href="css/watch.css?v=202611241931">
+<link rel="stylesheet" href="css/dash.css?v=202611241931">
+<link rel="stylesheet" href="css/pro.css?v=202611241931">
+<link rel="stylesheet" href="css/cf.css?v=202611241931">
+<link rel="stylesheet" href="css/finish.css?v=202611241931">
 </head>
 <body>
 
@@ -610,10 +611,10 @@ footer nav a{text-decoration:none}
           <div class="w4chat"><p class="q">Budget ad set level pe rakhein?</p><p class="a">Haan, abhi ad set level pe. Scaling mein CBO dekhenge.</p></div></div>
         </div>
       </article>
-      <article class="atile ar"><div class="att"><h3>Recordings.</h3><p>Missed a class? Watch it any time.</p></div><div class="abig">⟲</div></article>
-      <article class="atile ar"><div class="att"><h3>Homework.</h3><p>A real task after every class.</p></div><div class="abig">✓</div></article>
-      <article class="atile ar"><div class="att"><h3>Doubt support.</h3><p>No question is too basic.</p></div><div class="abig">?</div></article>
-      <article class="atile ar"><div class="att"><h3>Hinglish.</h3><p>Every concept, in words you use.</p></div><div class="abig ahin">हिंदी + English</div></article>
+      <article class="atile ar"><div class="att"><h3>Recordings.</h3><p>Missed a class? Watch it any time.</p></div><span class="aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M10 9l5 3-5 3z"/></svg></span></article>
+      <article class="atile ar"><div class="att"><h3>Homework.</h3><p>A real task after every class.</p></div><span class="aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h5"/><path d="M9 16.5l2 2 4-4"/></svg></span></article>
+      <article class="atile ar"><div class="att"><h3>Doubt support.</h3><p>No question is too basic.</p></div><span class="aico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12z"/><path d="M10 9.5a2.2 2.2 0 1 1 3 2c-.6.3-1 .8-1 1.4v.3M12 16h.01"/></svg></span></article>
+      <article class="atile ar"><div class="att"><h3>Hinglish.</h3><p>Every concept, in words you use.</p></div><span class="aico ahin2">अ<i>A</i></span></article>
     </div>
   </div>
 </section>
@@ -1009,7 +1010,7 @@ function lessonBtn(m,i){
   const canPlay=S.admin||m.free;
   if((m.video||m.drive)&&canPlay)return `<a class="pl" href="#watch-${esc(curCourse?curCourse.s:'')}/${i+1}" aria-label="Play ${esc(m.t)}">▶</a>`;
   if(m.url&&canPlay&&safeUrl(m.url))return `<a class="pl" href="${esc(safeUrl(m.url))}" target="_blank" rel="noopener" aria-label="Open ${esc(m.t)}">↗</a>`;
-  return `<span class="pl" title="${m.video||m.url||m.locked?'Unlocks after enrollment':'Taught live'}" aria-hidden="true">${m.video||m.url||m.locked?LOCK:'<svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="currentColor"/></svg>'}</span>`;
+  return `<span class="pl pll" title="Unlocks after enrolment" aria-label="Locked">${LOCK}</span>`;
 }
 let curCourse=null;
 const LOCK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -1274,8 +1275,8 @@ document.getElementById('lf').addEventListener('submit',e=>{
 </script>
 
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll(".stack td:not([data-l])")){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest("table").rows[0].cells[i]?.textContent||""}}).observe(document,{childList:true,subtree:true})</script>
-<script src="js/app.js?v=202611241923"></script>
-<script src="js/watch.js?v=202611241923"></script>
-<script src="js/apple.js?v=202611241923"></script>
+<script src="js/app.js?v=202611241931"></script>
+<script src="js/watch.js?v=202611241931"></script>
+<script src="js/apple.js?v=202611241931"></script>
 </body>
 </html>

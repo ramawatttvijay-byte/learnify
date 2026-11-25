@@ -115,7 +115,7 @@
 .dash2 .walc{border-radius:var(--r);min-height:248px;padding:22px 24px;background:linear-gradient(160deg,#1c1638 0%,#2a1d66 55%,#4a2bd6 130%);box-shadow:0 1px 2px rgba(14,14,19,.08);border:1px solid #2a2350}
 .dash2 .wlogo{width:28px;height:28px;border-radius:8px;background:rgba(255,255,255,.12);font:700 13px var(--ui)}
 .dash2 .wch small{font:500 13px var(--ui);opacity:.75}
-.dash2 .chip{width:30px;height:22px;border-radius:5px;background:linear-gradient(135deg,#e9e9ef,#a9a9b8);opacity:.8}
+.dash2 .wcc{width:30px;height:22px;border-radius:5px;background:linear-gradient(135deg,#e9e9ef,#a9a9b8);opacity:.8}
 .dash2 .wlb{font:500 12px var(--ui);opacity:.6;text-transform:uppercase;letter-spacing:.06em}
 .dash2 .wamt{font:600 38px/1.1 var(--ui);letter-spacing:-.03em}
 .dash2 .wsplit{font-size:12px;opacity:.75}

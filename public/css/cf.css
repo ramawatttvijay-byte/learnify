@@ -79,3 +79,22 @@ h1,h2,h3{font-family:var(--hd);letter-spacing:-.02em;font-weight:600}
  .dash2 .wact .sp{flex:none}
  .dash2 .wid small{font-size:12px}
 }
+
+/* bigger photo + bolder money for screen recordings */
+.dash2 .wav{padding:4px}
+.dash2 .wav .avx.xl{width:104px;height:104px;box-shadow:0 0 0 4px var(--card)}
+.dash2 .wav .avx.xl b{font-size:34px}
+.dash2 .wcam{width:32px;height:32px;right:0;bottom:0}.dash2 .wcam svg{width:15px;height:15px}
+.dash2 .wid h1{font-size:28px}
+.dash2 .ktl b{font-size:30px}
+.dash2 .me2 .av3 .avx{width:48px;height:48px}
+@media(max-width:900px){
+ .dash2 .wel{flex-direction:column;align-items:center;text-align:center;padding:24px 18px 18px}
+ .dash2 .wav .avx.xl{width:112px;height:112px}.dash2 .wav .avx.xl b{font-size:36px}
+ .dash2 .wid{padding-right:0;justify-items:center;min-width:0;width:100%}
+ .dash2 .wid h1{font-size:24px}
+ .dash2 .wid p{justify-content:center}
+ .dash2 .wid small{order:3;margin-top:4px}
+ .dash2 .wact{justify-content:center}
+}
+@media(max-width:560px){.dash2 .ktl b{font-size:23px}.dash2 .ktl{padding:16px 14px}}

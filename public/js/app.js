@@ -343,7 +343,7 @@ if(LIVE){
  const firstName=()=>esc(user().name.split(' ')[0]||'there');
  const ownedCourses=()=>{const en=LIVE?LFAPI.enrolled():L.visible().map(c=>c.s);return L.visible().filter(c=>en.includes(c.s))};
  const levelInfo=()=>{let i=MILES.findIndex(m=>ME.all<m.amt);if(i<0)i=MILES.length-1;const prev=i?MILES[i-1].amt:0,nx=MILES[i];const pct=Math.max(0,Math.min(100,Math.round((ME.all-prev)/(nx.amt-prev)*100)));return{i,prev,nx,pct}};
- const walletCard=(big)=>`<section class="walc${big?' big':''}"><div class="wch"><span class="wlogo">L</span><small>Learnify Wallet</small><span class="chip" aria-hidden="true"></span></div>
+ const walletCard=(big)=>`<section class="walc${big?' big':''}"><div class="wch"><span class="wlogo">L</span><small>Learnify Wallet</small><span class="wcc" aria-hidden="true"></span></div>
    <small class="wlb">Available to withdraw</small><b class="wamt" data-cu="${ME.bal||0}">${inr(ME.bal||0)}</b>
    <div class="wsplit"><span><i class="g"></i>Pending <b>${inr(ME.pending||0)}</b></span><span><i class="y"></i>Min. withdrawal <b>${inr(ME.minPayout||500)}</b></span></div>
    <div class="wbtns"><a class="wb1" href="#dash-payouts">Withdraw</a><a class="wb2" href="#dash-payouts" data-scroll="hist">History</a></div></section>`;
