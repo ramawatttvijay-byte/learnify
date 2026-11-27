@@ -99,7 +99,7 @@
     let t = document.getElementById('lfToast');
     if (!t) { t = document.createElement('div'); t.id = 'lfToast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
     t.textContent = msg; t.className = ok ? 'ok' : 'bad'; t.classList.add('on');
-    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 4200);
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), ok ? 4200 : 12000);
   }
   async function buy(kind, id) {
     await ready;

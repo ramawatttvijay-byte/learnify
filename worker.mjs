@@ -35,6 +35,14 @@ async function proxy(request, base) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === '/api/_diag') {
+      // Public, non-secret setup check: which backend runs and which Razorpay Key ID it sees.
+      const t = v => String(v || '').replace(/[\s"'`]/g, '');
+      const id = t(env.RAZORPAY_KEY_ID), sec = t(env.RAZORPAY_KEY_SECRET);
+      return Response.json({ backend: env.MONGODB_URI ? 'cloudflare' : 'netlify-fallback', keyId: id || null,
+        secretChars: sec.length, mode: id.startsWith('rzp_live_') ? 'live' : id.startsWith('rzp_test_') ? 'test' : 'unknown',
+        at: new Date().toISOString() }, { headers: { 'cache-control': 'no-store' } });
+    }
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
       if (!env.MONGODB_URI) {
         const r = await proxy(request, env.API_FALLBACK || FALLBACK_API);
