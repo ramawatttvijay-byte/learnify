@@ -289,8 +289,10 @@ async function priceOf(db, kind, id) {
   throw httpError(400, 'Unknown item');
 }
 
+// Keys pasted into a dashboard often carry spaces, line breaks or quotes; strip them.
+const rk = n => String(process.env[n] || '').replace(/[\s"'`]/g, '');
 async function razorpay(path, payload) {
-  const id = process.env.RAZORPAY_KEY_ID, sec = process.env.RAZORPAY_KEY_SECRET;
+  const id = rk('RAZORPAY_KEY_ID'), sec = rk('RAZORPAY_KEY_SECRET');
   if (!id || !sec) throw httpError(500, 'Razorpay keys are not set');
   const r = await fetch('https://api.razorpay.com/v1' + path, {
     method: 'POST', headers: { 'content-type': 'application/json', authorization: 'Basic ' + Buffer.from(`${id}:${sec}`).toString('base64') },
@@ -300,7 +302,8 @@ async function razorpay(path, payload) {
   if (!r.ok) {
     const why = data?.error?.description || ('HTTP ' + r.status);
     console.error('Razorpay error', r.status, JSON.stringify(data));
-    throw httpError(424, r.status === 401 ? 'Payment setup error: Razorpay keys are wrong (' + why + ')' : 'Payment service error: ' + why);
+    const seen = ` [server key: ${id}, secret: ${sec.length} chars${/^rzp_(test|live)_/.test(id) ? '' : ', Key ID should start with rzp_test_ or rzp_live_'}]`;
+    throw httpError(424, r.status === 401 ? 'Payment setup error: Razorpay keys are wrong (' + why + ')' + seen : 'Payment service error: ' + why);
   }
   return data;
 }
@@ -317,7 +320,7 @@ on('POST', '/pay/order', async ({ db, user, body }) => {
     _id: orderId, rpOrderId: rp.id, userId: user._id, userName: user.name, userEmail: user.email, kind, itemId: id,
     title: item.title, slugs: item.slugs, amount: item.amount, status: 'created', referredBy: user.referredBy || null, createdAt: now()
   });
-  return json({ keyId: process.env.RAZORPAY_KEY_ID, rpOrderId: rp.id, amount: item.amount * 100, title: item.title, name: user.name, email: user.email, phone: user.phone || '' });
+  return json({ keyId: rk('RAZORPAY_KEY_ID'), rpOrderId: rp.id, amount: item.amount * 100, title: item.title, name: user.name, email: user.email, phone: user.phone || '' });
 }, { auth: true });
 
 async function fulfil(db, rpOrderId, paymentId) {
@@ -344,7 +347,7 @@ async function fulfil(db, rpOrderId, paymentId) {
 on('POST', '/pay/verify', async ({ db, user, body }) => {
   const { razorpay_order_id: o, razorpay_payment_id: p, razorpay_signature: sig } = body;
   if (!o || !p || !sig) throw httpError(400, 'Missing payment details');
-  const want = hmacHex(process.env.RAZORPAY_KEY_SECRET || '', `${o}|${p}`);
+  const want = hmacHex(rk('RAZORPAY_KEY_SECRET'), `${o}|${p}`);
   if (!safeEqual(want, sig)) throw httpError(400, 'Payment could not be verified');
   const order = await fulfil(db, o, p);
   if (!order || order.userId !== user._id) throw httpError(404, 'Order not found');
@@ -353,7 +356,7 @@ on('POST', '/pay/verify', async ({ db, user, body }) => {
 
 on('POST', '/pay/webhook', async ({ req, db, raw }) => {
   const sig = req.headers.get('x-razorpay-signature');
-  const want = hmacHex(process.env.RAZORPAY_WEBHOOK_SECRET || '', raw);
+  const want = hmacHex(rk('RAZORPAY_WEBHOOK_SECRET'), raw);
   if (!sig || !safeEqual(want, sig)) throw httpError(400, 'Bad signature');
   const ev = JSON.parse(raw);
   if (ev.event === 'payment.captured') { const pe = ev.payload.payment.entity; await fulfil(db, pe.order_id, pe.id); }

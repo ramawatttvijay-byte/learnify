@@ -36,7 +36,11 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
-      if (!env.MONGODB_URI) return proxy(request, env.API_FALLBACK || FALLBACK_API);
+      if (!env.MONGODB_URI) {
+        const r = await proxy(request, env.API_FALLBACK || FALLBACK_API);
+        const h = new Headers(r.headers); h.set('x-lf-backend', 'netlify-fallback');
+        return new Response(r.body, { status: r.status, headers: h });
+      }
       const id = env.API.idFromName('main');
       const res = await env.API.get(id, { locationHint: 'apac' }).fetch(request); // near the Mumbai database
       if (res.status >= 400 && url.pathname.startsWith('/api/pay/')) {
