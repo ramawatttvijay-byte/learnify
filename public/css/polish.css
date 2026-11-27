@@ -1,0 +1,78 @@
+/* Final type and card pass for the public site (phone + laptop). Loaded last.
+   One fluid scale: body 16→17px, small text never under 13.5px, card copy 15.5→16px,
+   generous padding and touch targets, one card style everywhere. */
+html:not(.inapp){--t-sm:clamp(13.5px,.25vw + 12.6px,14.5px);--t-card:clamp(15.5px,.2vw + 14.8px,16.5px);--t-ct:clamp(20px,.6vw + 17.6px,24px);--r-card:22px;
+ --sh-card:0 1px 2px rgba(16,12,48,.04),0 12px 32px -18px rgba(16,12,48,.18);--sh-hover:0 2px 4px rgba(16,12,48,.05),0 24px 48px -22px rgba(75,31,245,.32)}
+html:not(.inapp) body{font-size:clamp(16px,.2vw + 15.3px,17px);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+html:not(.inapp) p{text-wrap:pretty}
+html:not(.inapp) h1,html:not(.inapp) h2,html:not(.inapp) h3{text-wrap:balance}
+html:not(.inapp) .lead{font-size:clamp(17px,.55vw + 15px,21px);line-height:1.5}
+
+/* ---------- course cards ---------- */
+html:not(.inapp) .cc{border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-card)}
+@media(hover:hover){html:not(.inapp) .cc:hover{transform:translateY(-4px);box-shadow:var(--sh-hover)}}
+html:not(.inapp) .cb{padding:clamp(18px,1.6vw,24px);gap:10px}
+html:not(.inapp) .cb h3{font:600 var(--t-ct)/1.2 var(--hd);letter-spacing:-.02em}
+html:not(.inapp) .cb p{font-size:var(--t-card);line-height:1.55}
+html:not(.inapp) .cat,html:not(.inapp) .st,html:not(.inapp) .by{font-size:var(--t-sm)!important}
+html:not(.inapp) .inc li{font-size:15px;gap:10px}
+html:not(.inapp) .pr b{font-size:clamp(20px,1vw + 14px,24px)}
+html:not(.inapp) .pr small{font-size:13.5px}
+html:not(.inapp) .vc{min-height:44px!important;padding:0 20px!important;font:600 15px var(--bd)!important;border-radius:999px}
+
+/* ---------- section tiles, plans, mentors, compare, FAQ ---------- */
+html:not(.inapp) .atile{box-shadow:var(--sh-card)}
+html:not(.inapp) .atile p{font-size:var(--t-card);line-height:1.55}
+html:not(.inapp) .att p{font-size:var(--t-card)}
+html:not(.inapp) .plan{border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-card)}
+html:not(.inapp) .plan li{font-size:var(--t-card);line-height:1.5}
+html:not(.inapp) .plan small,html:not(.inapp) .pz2 small{font-size:var(--t-sm)}
+html:not(.inapp) .amt,html:not(.inapp) .mate{border:1px solid var(--line);border-radius:var(--r-card);box-shadow:var(--sh-card)}
+html:not(.inapp) .amt p,html:not(.inapp) .mate p{font-size:var(--t-card);line-height:1.55}
+html:not(.inapp) .amt small{font-size:var(--t-sm)}
+html:not(.inapp) .cmp{border-radius:var(--r-card)}
+html:not(.inapp) .cr,html:not(.inapp) .cr span{font-size:clamp(14px,.3vw + 13px,16px)}
+html:not(.inapp) .faq summary{font-size:clamp(17px,.5vw + 15px,21px);line-height:1.35}
+html:not(.inapp) .faq details p,html:not(.inapp) .faq .ans{font-size:var(--t-card);line-height:1.6}
+html:not(.inapp) .ctabs button{min-height:40px;font-size:15px;padding:0 18px}
+html:not(.inapp) .achip small{font-size:13px}html:not(.inapp) .achip b{font-size:15px}
+html:not(.inapp) .snote{font-size:13.5px}
+html:not(.inapp) .gets small,html:not(.inapp) .cdfacts span,html:not(.inapp) .tx small{font-size:var(--t-sm)}
+html:not(.inapp) .in li{font-size:var(--t-card)}
+
+/* product mock-ups: keep their tiny UI text readable on phones */
+@media(max-width:600px){
+ html:not(.inapp) .lp-side span,html:not(.inapp) .lp-side .on,html:not(.inapp) .prow span,html:not(.inapp) .prow em,html:not(.inapp) .lp-main small{font-size:10.5px}
+ html:not(.inapp) .lp-side b,html:not(.inapp) .lp-main b{font-size:12px}
+ html:not(.inapp) .lp-live{font-size:9.5px}
+}
+
+/* ---------- footer ---------- */
+html:not(.inapp) .ft3 p{font-size:15px;line-height:1.6}
+html:not(.inapp) .ft3 a:not(.btn){font-size:15px}
+html:not(.inapp) .ft3 h4,html:not(.inapp) .ft3 b{font-size:15px}
+html:not(.inapp) .ftbot{font-size:14px}
+
+/* ---------- phones ---------- */
+@media(max-width:600px){
+ html:not(.inapp) .wrap{padding-left:20px;padding-right:20px}
+ html:not(.inapp) .cb{padding:18px 18px 20px}
+ html:not(.inapp) .vc{min-height:46px!important}
+ html:not(.inapp) .btn{min-height:50px}
+ html:not(.inapp) .cr,html:not(.inapp) .cr span{font-size:14.5px}
+}
+html:not(.inapp) .certc .cseal{-webkit-background-clip:border-box!important;background-clip:border-box!important;-webkit-text-fill-color:#fff!important;color:#fff!important;background:linear-gradient(135deg,#4b1ff5,#a60eef 60%,#ff0a8c)!important;font-size:10px!important;letter-spacing:.08em}
+
+/* ---------- course page ---------- */
+html:not(.inapp) .cds .pz{flex-wrap:wrap;row-gap:4px}
+html:not(.inapp) .cds .pz b{font-size:clamp(32px,3vw,40px);white-space:nowrap;padding-right:2px}
+html:not(.inapp) .syl .tx b{font-size:clamp(16px,.3vw + 15px,17px);line-height:1.3}
+html:not(.inapp) .syl .tx small{font-size:var(--t-sm);line-height:1.45;display:block;margin-top:2px}
+@media(max-width:600px){
+ html:not(.inapp) .cdbox{padding:18px 16px;border-radius:20px}
+ html:not(.inapp) .syl li{padding:12px;gap:12px;border-radius:14px}
+ html:not(.inapp) .syl .pl{width:34px;height:34px}
+ html:not(.inapp) .syl .no{font-size:13px;padding:4px 8px}
+ html:not(.inapp) .gets>*{padding:14px}
+ html:not(.inapp) section:has(>.wrap),html:not(.inapp) section.cdp,html:not(.inapp) section.legal,html:not(.inapp) section.phead,html:not(.inapp) #packages>div>section,html:not(.inapp) #jobs>div>section{padding-left:0;padding-right:0}
+}
