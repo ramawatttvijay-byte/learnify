@@ -131,3 +131,22 @@ nav[aria-label="Main"] a{font-weight:500}
 .authcard{box-sizing:border-box;min-width:0}
 .authcard>*,.authcard .afld>*{min-width:0;max-width:100%;box-sizing:border-box}
 .authcard input{width:100%;min-width:0;box-sizing:border-box}
+
+/* ---------- policies (terms, privacy, refund, delivery) ---------- */
+.legal{padding:calc(var(--navh,72px) + 40px) 0 80px;background:var(--bg)}
+.lgwrap{display:grid;grid-template-columns:220px minmax(0,720px);gap:56px;justify-content:center;align-items:start}
+.lgnav{position:sticky;top:calc(var(--navh,72px) + 24px);display:flex;flex-direction:column;gap:2px}
+.lgnav a{padding:9px 12px;border-radius:10px;color:var(--mute);text-decoration:none;font:500 14.5px var(--bd)}
+.lgnav a:hover{background:var(--bg2);color:var(--ink)}
+.lgnav a.on{background:var(--bg2);color:var(--ink);font-weight:600}
+.lgdoc{color:var(--ink);font-size:16px;line-height:1.75}
+.lgdoc .lgk{font:600 13px var(--bd);color:var(--p);letter-spacing:.02em}
+.lgdoc h1{font:600 clamp(32px,4vw,44px)/1.1 var(--hd);letter-spacing:-.02em;margin:8px 0 6px}
+.lgdoc .lgd{color:var(--mute);font-size:14px;margin:0 0 28px;padding-bottom:22px;border-bottom:1px solid var(--line)}
+.lgdoc h2{font:600 20px/1.3 var(--hd);letter-spacing:-.01em;margin:32px 0 8px}
+.lgdoc p{margin:0 0 14px;color:var(--ink2,var(--ink))}
+.lgdoc ul{margin:0 0 14px;padding-left:20px}.lgdoc li{margin:6px 0}
+.lgdoc a{color:var(--p)}
+.ftlg{display:flex;gap:18px;flex-wrap:wrap}.ftlg a{color:inherit;text-decoration:none}.ftlg a:hover{color:var(--ink);text-decoration:underline}
+.authcard .aterms a{color:inherit;text-decoration:underline}
+@media(max-width:860px){.lgwrap{grid-template-columns:1fr;gap:20px}.lgnav{position:static;flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}.lgnav a{white-space:nowrap;background:var(--bg2)}}
