@@ -76,3 +76,71 @@ html:not(.inapp) .syl .tx small{font-size:var(--t-sm);line-height:1.45;display:b
  html:not(.inapp) .gets>*{padding:14px}
  html:not(.inapp) section:has(>.wrap),html:not(.inapp) section.cdp,html:not(.inapp) section.legal,html:not(.inapp) section.phead,html:not(.inapp) #packages>div>section,html:not(.inapp) #jobs>div>section{padding-left:0;padding-right:0}
 }
+
+/* =========================================================
+   Premium finish: depth, light, restraint
+   ========================================================= */
+html{scroll-behavior:smooth}
+::selection{background:rgba(91,31,243,.18);color:inherit}
+html:not(.inapp){--prem-g:linear-gradient(135deg,#4b1ff5 0%,#7a12f0 55%,#c00fd8 100%)}
+
+/* nav: thinner, calmer glass */
+html:not(.inapp) body>nav{background:color-mix(in srgb,var(--bg) 70%,transparent);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+html:not(.inapp) body>nav a[data-nav]{font-weight:500;letter-spacing:-.005em}
+
+/* primary buttons: depth + light edge */
+html:not(.inapp) .abtn,html:not(.inapp) .btn-main{background:var(--prem-g)!important;color:#fff!important;border:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 1px 2px rgba(40,10,120,.25),0 10px 24px -10px rgba(91,31,243,.55)!important;transition:transform .25s var(--ease,ease),box-shadow .25s,filter .25s}
+@media(hover:hover){html:not(.inapp) .abtn:hover,html:not(.inapp) .btn-main:hover{transform:translateY(-1px);filter:saturate(1.1);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 2px 4px rgba(40,10,120,.25),0 16px 32px -12px rgba(91,31,243,.65)!important}}
+html:not(.inapp) .abtn:active,html:not(.inapp) .btn-main:active{transform:translateY(0) scale(.99)}
+
+/* hero: soft light, faint grid, glass eyebrow */
+html:not(.inapp) .ahero{position:relative;isolation:isolate;background:
+ radial-gradient(60% 50% at 18% 8%,rgba(75,31,245,.12),transparent 70%),
+ radial-gradient(50% 45% at 85% 12%,rgba(192,15,216,.10),transparent 70%),var(--bg)}
+html:not(.inapp) .ahero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background-image:linear-gradient(color-mix(in srgb,var(--ink) 6%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--ink) 6%,transparent) 1px,transparent 1px);background-size:56px 56px;
+ -webkit-mask-image:radial-gradient(70% 55% at 50% 22%,#000 20%,transparent 75%);mask-image:radial-gradient(70% 55% at 50% 22%,#000 20%,transparent 75%)}
+html:not(.inapp) .aeyebrow{padding:7px 14px 7px 12px;border-radius:99px;font-size:14px!important;font-weight:600;background:color-mix(in srgb,var(--card) 75%,transparent);border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,12,48,.05);backdrop-filter:blur(10px);margin-bottom:18px!important}
+html:not(.inapp) .atitle{letter-spacing:-.04em;font-weight:600}
+html:not(.inapp) .asub{color:var(--mute);max-width:640px;margin-left:auto;margin-right:auto}
+html:not(.inapp) .astage{border-radius:32px;box-shadow:0 0 0 1px color-mix(in srgb,var(--line) 80%,transparent),0 40px 80px -40px rgba(75,31,245,.45)}
+html:not(.inapp) .achip{border:1px solid color-mix(in srgb,var(--line) 70%,transparent);box-shadow:0 12px 30px -16px rgba(16,12,48,.35)}
+
+/* stats: hairlines + gradient numerals */
+@media(min-width:761px){html:not(.inapp) .asg>.ar+.ar{border-left:1px solid var(--line)}}
+html:not(.inapp) .astats b{background:var(--prem-g);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:-.03em}
+
+/* alternate sections: a whisper of colour instead of flat grey */
+html:not(.inapp) .asec.alt{background:linear-gradient(180deg,var(--bg2),color-mix(in srgb,var(--bg2) 60%,var(--bg)))}
+
+/* closing call to action: dark, lit from below */
+html:not(.inapp) .asec.aend{position:relative;overflow:hidden;background:#0d0b22;color:#fff;padding:clamp(80px,11vw,140px) 0}
+html:not(.inapp) .asec.aend::before{content:"";position:absolute;left:50%;bottom:-40%;width:min(1100px,140vw);height:120%;transform:translateX(-50%);background:radial-gradient(50% 50% at 50% 50%,rgba(122,18,240,.55),rgba(75,31,245,.25) 45%,transparent 70%);filter:blur(20px);pointer-events:none}
+html:not(.inapp) .asec.aend .wrap4{position:relative}
+html:not(.inapp) .asec.aend h2{color:#fff}
+html:not(.inapp) .asec.aend .gt{background:linear-gradient(90deg,#b9a3ff,#f08cff);-webkit-background-clip:text;background-clip:text;color:transparent}
+html:not(.inapp) .asec.aend .alink{color:#d6ccff}
+
+/* footer joins the dark closing band */
+html:not(.inapp) .asec.aend+*,html:not(.inapp) .ft3{border-top:0}
+html:not(.inapp) .ft3{background:#0d0b22!important;color:rgba(255,255,255,.62)!important;border-top:1px solid rgba(255,255,255,.08)!important}
+html:not(.inapp) .ft3 h4{color:#fff!important}
+html:not(.inapp) .ft3 a:not(.btn){color:rgba(255,255,255,.62)!important}
+html:not(.inapp) .ft3 a:not(.btn):hover{color:#fff!important}
+html:not(.inapp) .ft3 p{color:rgba(255,255,255,.6)!important}
+html:not(.inapp) .ft3 .lg-l{display:none!important}html:not(.inapp) .ft3 .lg-d{display:block!important}
+html:not(.inapp) .ft3 .ftg{border-bottom:1px solid rgba(255,255,255,.1)!important}
+html:not(.inapp) .ft3 .ftbot{color:rgba(255,255,255,.45)}
+
+/* section headings: tighter, more confident */
+html:not(.inapp) .asec h2{letter-spacing:-.035em}
+
+/* dark theme tuning */
+[data-theme="dark"] html:not(.inapp) .ahero::before,[data-theme="dark"] .ahero::before{opacity:.5}
+
+/* inner page headers share the hero's light */
+html:not(.inapp) .phead{position:relative;isolation:isolate;background:radial-gradient(55% 70% at 12% 0%,rgba(75,31,245,.11),transparent 70%),radial-gradient(45% 60% at 92% 10%,rgba(192,15,216,.08),transparent 70%),var(--bg)!important}
+html:not(.inapp) .phead::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(color-mix(in srgb,var(--ink) 5%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--ink) 5%,transparent) 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(60% 80% at 25% 20%,#000 15%,transparent 75%);mask-image:radial-gradient(60% 80% at 25% 20%,#000 15%,transparent 75%)}
+html:not(.inapp) .phead h1{letter-spacing:-.04em}
+html:not(.inapp) .phead .kick{display:inline-flex;width:fit-content;align-self:flex-start;align-items:center;gap:8px;padding:6px 12px;border-radius:99px;font-size:13.5px;background:color-mix(in srgb,var(--card) 75%,transparent);border:1px solid var(--line);margin-bottom:14px}
+html:not(.inapp) .phead .kick::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--prem-g)}
