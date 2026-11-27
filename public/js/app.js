@@ -34,9 +34,9 @@ const MODS=[
  ['Learn','dash-courses','My Courses','book'],['Learn','dash-training','Training','star'],['Learn','dash-quiz','Quiz','quiz'],['Learn','dash-certificates','Certificates','cert'],
  ['Earn','dash-affiliate','Affiliate Links','link'],['Earn','dash-tools','Marketing Tools','tool'],['Earn','dash-payouts','Payouts & Wallet','pay'],
  ['Grow','dash-leaderboard','Leaderboard','trophy'],['Grow','dash-team','My Team','team'],['Grow','dash-milestones','Milestones & Rewards','flag'],
- ['Account','dash-profile','Profile & Security','user'],['Account','dash-kyc','KYC','id'],['Account','dash-help','Help & Community','chat'],['Account','dash-upgrade','Upgrade','up']
+ ['Account','dash-profile','Profile','user'],['Account','dash-security','Password & Security','lock'],['Account','dash-kyc','KYC','id'],['Account','dash-help','Help & Community','chat'],['Account','dash-upgrade','Upgrade','up']
 ];
-const ALIAS={wallet:'payouts',associates:'team',missions:'milestones',security:'profile',mentor:'help',community:'help',atraining:'training'};
+const ALIAS={wallet:'payouts',associates:'team',missions:'milestones',mentor:'help',community:'help',atraining:'training'};
 /* ---------- sample data (preview only) ---------- */
 const NAMES=['Rohit Sharma','Priya Verma','Aman Khan','Sneha Gupta','Mohit Singh','Kavya Jain','Arjun Mehta','Pooja Yadav','Rahul Patel','Neha Joshi','Vikas Choudhary','Anjali Rawat','Sahil Bansal','Riya Kapoor','Deepak Meena'];
 const COMM=625;
@@ -84,7 +84,7 @@ function shell(){
   return `<div class="ap"><aside class="side2" id="side2" aria-label="Student menu">
    <div class="me2"><a class="av3" href="#dash-profile" aria-label="My profile">${avatar(u.name,u.avatar,"lg")}</a><span class="mei"><b>${esc(u.name)}</b><small>${esc(maskE(u.email))}</small><span class="pk">${esc(ME.pkg)} plan</span></span></div>
    <a class="meearn" href="#dash-payouts"><small>Total earned</small><b>${inr(ME.all||0)}</b><span>Wallet ${inr(ME.bal||0)} →</span></a>
-   <div class="sidenav" role="navigation" aria-label="Dashboard sections">${nav}</div>
+   <div class="sidenav" role="navigation" aria-label="Dashboard sections">${u.role==='admin'?`<a class="admgo" href="#admin">${I(IC.tool)}<span>Admin panel</span><em>Admin</em></a>`:''}${nav}</div>
    ${wa?`<a class="sidehelp" href="${esc(wa)}" target="_blank" rel="noopener"><b>Need help?</b><small>Message your mentor on WhatsApp</small></a>`:''}
    <a href="#login" class="lo2" id="lo2">${I(IC.out)}<span>Log out</span></a></aside><div class="scrim" id="scrim"></div><main class="mainp" id="mainp"></main></div>`;
 }
@@ -221,7 +221,9 @@ const sec=(t,h)=>`<h2 class="sh2">${t}</h2>`+h;
  VIEWS.team=()=>O.team()+strip(O.associates());
  VIEWS.milestones=()=>O.milestones()+sec('Missions',strip(O.missions()));
  VIEWS.profile=()=>top('Profile & Security')+strip(O.profile())+strip(O.security());
- VIEWS.help=()=>top('Help & Community')+strip(O.mentor())+strip(O.community());}
+ VIEWS.help=()=>top('Help & Community')+strip(O.mentor())+strip(O.community());
+ VIEWS.security=()=>{const u=user();return top('Password & Security')+`<div class="secg"><section class="cardp"><h2>Change password</h2><p class="muted sm2">Use at least 8 characters. Changing it keeps you logged in on this device only.</p><form class="fm" id="scF" novalidate><label class="full">Current password<input type="password" autocomplete="current-password"></label><label>New password<input type="password" autocomplete="new-password" minlength="8"></label><label>Confirm new password<input type="password" autocomplete="new-password"></label><div class="full"><button class="btn btn-main" type="submit">Update password</button> <span class="amsg" id="scM"></span></div></form></section>
+  <section class="cardp"><h2>Your login</h2><ul class="secl"><li><span>Email</span><b>${esc(maskE(u.email))}</b></li><li><span>WhatsApp</span><b>${esc(u.phone?u.phone.replace(/\d(?=\d{3})/g,'•'):'Not added')}</b></li><li><span>Sign-in</span><b>One device at a time</b></li></ul><p class="muted sm2">You can log in with your email or WhatsApp number. Forgot your password? Use "Forgot password?" on the login page and we'll send a reset link.</p>${u.phone?'':'<a class="btn pill pill-o" href="#dash-profile">Add WhatsApp number</a>'}</section></div>`};}
 const AFTER={
  dashboard(){wireCopy();requestAnimationFrame(()=>document.querySelectorAll('.bars i').forEach((b,i)=>setTimeout(()=>b.style.height=b.dataset.h+'px',60+i*60)))},
  affiliate(){wireCopy();const s=document.getElementById('afSel'),o=document.getElementById('afOut'),b=document.getElementById('afCopy');s.addEventListener('change',()=>{o.textContent=refUrl(s.value)});b.addEventListener('click',()=>{try{navigator.clipboard.writeText(o.textContent).then(()=>{b.textContent='Copied!';setTimeout(()=>b.textContent='Copy link',1600)},()=>{})}catch(e){}})},
@@ -333,6 +335,7 @@ if(LIVE){
  AFTER.profile=()=>{const f=document.getElementById('pfF');if(f){const u=user(),ins=f.querySelectorAll('input,textarea');ins[1].disabled=true;ins[2].value=u.phone||'';ins[3].value=u.city||'';ins[4].value=u.about||''}
   liveForm('pfF','pfM',async v=>{await LFAPI.j('/me',{method:'PUT',body:JSON.stringify({name:v[0],phone:v[2],city:v[3],about:v[4]})});return 'Profile saved.'});
   liveForm('scF','scM',async v=>{if(v[1]!==v[2])throw new Error('New passwords do not match');await LFAPI.j('/me/password',{method:'POST',body:JSON.stringify({current:v[0],next:v[1]})});return 'Password updated.'})};
+ AFTER.security=()=>liveForm('scF','scM',async v=>{if(v[1].length<8)throw new Error('New password must be at least 8 characters');if(v[1]!==v[2])throw new Error('New passwords do not match');await LFAPI.j('/me/password',{method:'POST',body:JSON.stringify({current:v[0],next:v[1]})});document.getElementById('scF').reset();return 'Password updated.'});
  AFTER.kyc=async()=>{liveForm('kyF','kyM',async v=>{await LFAPI.j('/kyc',{method:'POST',body:JSON.stringify({name:v[0],pan:v[1],upi:v[2],holder:v[3],account:v[4],ifsc:v[5]})});return 'Submitted. The team will verify it within 2 working days.'});
   try{const k=await LFAPI.j('/kyc');if(k.status!=='none'){const m=document.getElementById('kyM');m.textContent='Status: '+k.status+(k.note?' · '+k.note:'');m.className='amsg '+(k.status==='approved'?'ok':'')}}catch(e){}};
 }
@@ -528,6 +531,7 @@ if(LIVE){
   const ch=d.revPrev30?Math.round((d.rev30-d.revPrev30)/d.revPrev30*100):null,mx=Math.max(1,...d.byCourse.map(x=>x.v));
   const ser=d.series.map(x=>({l:new Date(x.d).toLocaleDateString('en-IN',{day:'numeric',month:'short'}),v:x.v}));
   box.innerHTML=`<div class="adm-ov">
+   ${d.pendingResets?`<div class="alert3 c12">${I(IC.lock)}<span>${d.pendingResets} student${d.pendingResets>1?'s':''} asked for password help</span><a href="#admin" data-go="resets">Send links →</a></div>`:''}
    ${d.pendingPayouts||d.pendingKyc?`<div class="alert3 c12">${I(IC.bell)}<span>${d.pendingPayouts?`${d.pendingPayouts} payout request${d.pendingPayouts>1?'s':''} waiting`:''}${d.pendingPayouts&&d.pendingKyc?' · ':''}${d.pendingKyc?`${d.pendingKyc} KYC to review`:''}</span><a href="#admin" data-go="${d.pendingPayouts?'payouts':'kycs'}">Review now →</a></div>`:''}
    <div class="kpx"><small>Revenue · last 30 days</small><b>${inr(d.rev30)}</b><em class="${ch==null?'':ch>=0?'up':'dn'}">${ch==null?'First month':(ch>=0?'▲ ':'▼ ')+Math.abs(ch)+'% vs previous 30 days'}</em></div>
    <div class="kpx"><small>Total revenue</small><b>${inr(d.revenue)}</b><em>${d.sales} paid orders · ${inr(d.today)} today</em></div>
@@ -558,6 +562,16 @@ if(LIVE){
  ADMIN.kycs=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';const d=await LFAPI.j('/admin/kyc');
   box.innerHTML=`<section class="cardp"><h2>KYC submissions <small class="muted">${d.kyc.filter(k=>k.status==='submitted').length} waiting</small></h2>${d.kyc.length?d.kyc.map(k=>`<div class="arow" data-kid="${esc(k.id)}">${who(k.name,'PAN '+(k.pan||'—'),'')}<span class="meta" style="flex:1">${esc(k.upi||'')}${k.account?` · A/c ${esc(k.account)} · ${esc(k.ifsc||'')}`:''}</span>${k.status==='submitted'?`<span class="bs"><button type="button" class="ok" data-ks="approved">Approve</button><button type="button" class="no" data-ks="rejected">Reject</button></span>`:tagS(k.status)}</div>`).join(''):'<div class="empty3 sm"><b>No KYC submissions yet</b></div>'}</section>`;
   box.querySelectorAll('[data-ks]').forEach(b=>b.addEventListener('click',async()=>{const id=b.closest('[data-kid]').dataset.kid,st=b.dataset.ks;let note='';if(st==='rejected')note=prompt('Reason (the student will see this):','PAN details do not match')||'';b.disabled=true;try{await LFAPI.j('/admin/kyc/'+encodeURIComponent(id),{method:'POST',body:JSON.stringify({status:st,note})});ADMIN.kycs(box)}catch(e){b.disabled=false;alert(e.message)}}))};
+ ADMIN.resets=async box=>{if(!LIVE)return needLive(box);box.innerHTML='<div class="skel tall"></div>';let d;try{d=await LFAPI.j('/admin/resets')}catch(e){box.innerHTML='<div class="empty3"><b>'+esc(e.message)+'</b></div>';return}
+  const open=d.resets.filter(r=>r.status==='open');
+  box.innerHTML=`<div class="adm-ov"><section class="cardp c12"><h2>Send a reset link <small class="muted">for a student who messaged you</small></h2><form class="rsf" id="rsF" novalidate><input id="rsIn" placeholder="Student's email or WhatsApp number" aria-label="Student's email or WhatsApp number"><button class="btn btn-main" type="submit">Create link</button></form><p class="amsg" id="rsM"></p></section>
+   <section class="cardp c12"><h2>Password help requests <small class="muted">${open.length} waiting</small></h2><p class="muted sm2">Students who tapped "Forgot password?". Send the one-time link on WhatsApp; it expires in 1 hour.</p>${d.resets.length?d.resets.map(r=>`<div class="arow" data-rid="${esc(r.id)}">${who(r.name,r.email,r.av)}<span class="meta">${esc(r.phone||'No number')}</span><span class="meta" style="flex:1;text-align:right">${agoTxt(new Date(r.d))}</span>${r.status==='sent'?'<span class="tag3 ok">Link sent</span>':''}<span class="bs"><button type="button" class="ok" data-rs>${r.status==='sent'?'Send again':'Send on WhatsApp'}</button></span></div>`).join(''):'<div class="empty3 sm"><b>No requests right now</b></div>'}</section></div>`;
+  const send=async(body,btn)=>{const r=await LFAPI.j('/admin/resets/link',{method:'POST',body:JSON.stringify(body)});
+   const ph=String(r.phone||'').replace(/\D/g,''),num=ph.length===10?'91'+ph:ph,txt=`Hi ${r.name}, here is your Learnify password reset link (works once, valid for ${r.minutes} minutes):\n${r.link}`;
+   if(num)window.open('https://wa.me/'+num+'?text='+encodeURIComponent(txt),'_blank','noopener');else{try{await navigator.clipboard.writeText(r.link)}catch(e){}alert('This student has no WhatsApp number. The link was copied:\n'+r.link)}return r};
+  box.querySelectorAll('[data-rs]').forEach(b=>b.addEventListener('click',async()=>{b.disabled=true;try{await send({id:b.closest('[data-rid]').dataset.rid});ADMIN.resets(box)}catch(e){b.disabled=false;alert(e.message)}}));
+  document.getElementById('rsF').addEventListener('submit',async e=>{e.preventDefault();const m=document.getElementById('rsM'),v=document.getElementById('rsIn').value.trim();if(!v){m.textContent='Enter an email or number.';m.className='amsg err';return}
+   try{const r=await send({login:v});m.textContent='Link created for '+r.name+(r.phone?' and opened in WhatsApp.':' and copied.');m.className='amsg ok'}catch(err){m.textContent=err.message;m.className='amsg err'}})};
  window.__lfVerify=verify;
 }
 

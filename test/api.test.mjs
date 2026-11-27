@@ -35,12 +35,12 @@ async function call(method, path, body, cookie, headers = {}) {
 
 let admin, alice, bob, aliceCode;
 test('signup, admin role, login, one device', async () => {
-  const a = await call('POST', '/auth/signup', { name: 'Boss', email: 'boss@learnify.in', password: 'password123' });
+  const a = await call('POST', '/auth/signup', { name: 'Boss', email: 'boss@learnify.in', password: 'password123', phone: '9000000002' });
   assert.equal(a.status, 201); assert.equal(a.data.user.role, 'admin'); admin = a.cookie;
   const s = await call('POST', '/auth/signup', { name: 'Alice', email: 'alice@x.com', password: 'password123', phone: '9876543210' });
   assert.equal(s.data.user.role, 'student'); alice = s.cookie; aliceCode = s.data.user.code;
-  assert.equal((await call('POST', '/auth/signup', { name: 'Alice2', email: 'alice@x.com', password: 'password123' })).status, 409);
-  const b = await call('POST', '/auth/signup', { name: 'Bob', email: 'bob@x.com', password: 'password123', ref: aliceCode });
+  assert.equal((await call('POST', '/auth/signup', { name: 'Alice2', email: 'alice@x.com', password: 'password123', phone: '9000000003' })).status, 409);
+  const b = await call('POST', '/auth/signup', { name: 'Bob', email: 'bob@x.com', password: 'password123', ref: aliceCode, phone: '9000000004' });
   bob = b.cookie;
   assert.equal((await call('POST', '/auth/login', { email: 'bob@x.com', password: 'nope' })).status, 401);
   const b2 = await call('POST', '/auth/login', { email: 'bob@x.com', password: 'password123' });
@@ -143,7 +143,7 @@ test('admin lists, settings, images, manual enroll', async () => {
 });
 
 test('profile photo upload and masked emails', async () => {
-  const s = await call('POST', '/auth/signup', { name: 'Photo User', email: 'photo.user@gmail.com', password: 'password123' });
+  const s = await call('POST', '/auth/signup', { name: 'Photo User', email: 'photo.user@gmail.com', password: 'password123', phone: '9000000005' });
   const bad = await call('POST', '/me/avatar', { data: 'data:text/html;base64,PGgxPg==' }, s.cookie);
   assert.equal(bad.status, 400);
   const ok = await call('POST', '/me/avatar', { data: 'data:image/webp;base64,UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==' }, s.cookie);
@@ -158,11 +158,11 @@ test('profile photo upload and masked emails', async () => {
 });
 
 test('certificate unlocks only after every lesson; verify is public; pulse reports sales', async () => {
-  const a = await call('POST', '/auth/signup', { name: 'Cert Admin', email: 'boss2@learnify.in', password: 'password123' });
+  const a = await call('POST', '/auth/signup', { name: 'Cert Admin', email: 'boss2@learnify.in', password: 'password123', phone: '9000000006' });
   await db.collection('users').updateOne({ email: 'boss2@learnify.in' }, { $set: { role: 'admin' } });
   const adm = (await call('POST', '/auth/login', { email: 'boss2@learnify.in', password: 'password123' })).cookie;
   await call('PUT', '/admin/courses/cert-course', { t: 'Cert Course', status: 'live', price: 100, modules: [{ t: 'L1' }, { t: 'L2' }] }, adm);
-  const st = await call('POST', '/auth/signup', { name: 'Cert Student', email: 'cs@x.com', password: 'password123' });
+  const st = await call('POST', '/auth/signup', { name: 'Cert Student', email: 'cs@x.com', password: 'password123', phone: '9000000007' });
   await call('POST', '/admin/enroll', { email: 'cs@x.com', slug: 'cert-course' }, adm);
   let c = await call('GET', '/certificate/cert-course', undefined, st.cookie);
   assert.equal(c.data.ready, false); assert.equal(c.data.total, 2);
@@ -177,4 +177,34 @@ test('certificate unlocks only after every lesson; verify is public; pulse repor
   assert.equal(ov.status, 200); assert.equal(ov.data.series.length, 30); assert.ok(Array.isArray(ov.data.recent));
   const pu = await call('GET', '/pulse?since=' + new Date(Date.now() - 864e5).toISOString(), undefined, st.cookie);
   assert.equal(pu.status, 200); assert.ok(Array.isArray(pu.data.items));
+});
+
+test('forgot password: request, admin WhatsApp link, reset, login by phone', async () => {
+  const s = await call('POST', '/auth/signup', { name: 'Riya Forgot', email: 'riya.f@gmail.com', password: 'oldpassword1', phone: '+91 98111 22334' });
+  assert.equal(s.status, 201);
+  assert.equal((await call('POST', '/auth/signup', { name: 'Dup', email: 'dup@x.com', password: 'password123', phone: '9811122334' })).status, 409);
+  assert.equal((await call('POST', '/auth/signup', { name: 'NoPhone', email: 'np@x.com', password: 'password123' })).status, 400);
+  // login with WhatsApp number works
+  assert.equal((await call('POST', '/auth/login', { email: '9811122334', password: 'oldpassword1' })).status, 200);
+  // same answer for unknown accounts
+  assert.equal((await call('POST', '/auth/forgot', { id: 'nobody@x.com' })).status, 200);
+  assert.equal((await call('POST', '/auth/forgot', { id: '98111 22334' })).status, 200);
+  const adm = await call('POST', '/auth/login', { email: 'boss@learnify.in', password: 'password123' });
+  assert.equal((await call('GET', '/admin/resets', undefined, s.cookie)).status, 403);
+  const list = await call('GET', '/admin/resets', undefined, adm.cookie);
+  const req = list.data.resets.find(r => r.email === 'riya.f@gmail.com');
+  assert.ok(req && req.status === 'open');
+  const ln = await call('POST', '/admin/resets/link', { id: req.id }, adm.cookie);
+  assert.equal(ln.status, 200);
+  const token = ln.data.link.split('#reset-')[1];
+  assert.ok(token.length >= 40);
+  assert.equal((await call('POST', '/auth/reset', { token: 'bad', password: 'newpassword1' })).status, 400);
+  assert.equal((await call('POST', '/auth/reset', { token, password: 'newpassword1' })).status, 200);
+  assert.equal((await call('POST', '/auth/reset', { token, password: 'again12345' })).status, 400); // one-time
+  assert.equal((await call('GET', '/me', undefined, s.cookie)).data.user, null); // old sessions signed out
+  assert.equal((await call('POST', '/auth/login', { email: 'riya.f@gmail.com', password: 'oldpassword1' })).status, 401);
+  assert.equal((await call('POST', '/auth/login', { email: 'riya.f@gmail.com', password: 'newpassword1' })).status, 200);
+  assert.equal((await call('GET', '/admin/resets', undefined, adm.cookie)).data.resets.some(r => r.email === 'riya.f@gmail.com'), false);
+  // admin can also make a link straight from an email
+  assert.equal((await call('POST', '/admin/resets/link', { login: 'riya.f@gmail.com' }, adm.cookie)).status, 200);
 });

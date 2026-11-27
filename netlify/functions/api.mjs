@@ -93,7 +93,9 @@ on('POST', '/auth/signup', async ({ body, db }) => {
   if (name.length < 2) throw httpError(400, 'Please enter your name');
   if (!isEmail(email)) throw httpError(400, 'Please enter a valid email');
   if (password.length < 8) throw httpError(400, 'Password must be at least 8 characters');
+  if (!phoneKey(phone)) throw httpError(400, 'Please enter your 10-digit WhatsApp number');
   if (await db.collection('users').findOne({ email })) throw httpError(409, 'An account with this email already exists. Please log in.');
+  if (await db.collection('users').findOne({ phone: { $regex: phoneKey(phone) + '$' } })) throw httpError(409, 'This WhatsApp number is already registered. Please log in.');
   let referredBy = null;
   const ref = clean(body.ref, 20).toUpperCase();
   if (ref) { const r = await db.collection('users').findOne({ code: ref }); if (r) referredBy = r._id; }
@@ -108,15 +110,15 @@ on('POST', '/auth/signup', async ({ body, db }) => {
 });
 
 on('POST', '/auth/login', async ({ body, db }) => {
-  const email = clean(body.email, 120).toLowerCase();
-  const user = await db.collection('users').findOne({ email });
+  const user = await findByLogin(db, body.email);
+  const email = user?.email || '';
   if (user?.lockUntil && new Date(user.lockUntil) > now()) throw httpError(429, 'Too many tries. Please wait 15 minutes.');
   if (!user || !(await checkPassword(String(body.password || ''), user.passwordHash))) {
     if (user) {
       const fails = (user.fails || 0) + 1;
       await db.collection('users').updateOne({ _id: user._id }, { $set: { fails, lockUntil: fails >= 5 ? new Date(Date.now() + 15 * 60e3) : null } });
     }
-    throw httpError(401, 'Wrong email or password');
+    throw httpError(401, 'Wrong email/number or password');
   }
   const role = adminList().includes(email) ? 'admin' : (user.role === 'admin' ? 'admin' : 'student');
   const upd = { fails: 0, lockUntil: null, role };
@@ -167,6 +169,86 @@ on('POST', '/me/password', async ({ db, user, body }) => {
   await db.collection('users').updateOne({ _id: user._id }, { $set: { passwordHash: await hashPassword(body.next) } });
   return json({ ok: true });
 }, { auth: true });
+
+/* ---------------- forgot / reset password ----------------
+   Free by design: SMS and WhatsApp OTPs cost money per message, so a student asks for a reset,
+   the admin sends a one-time link to the student's WhatsApp from the admin panel (wa.me, free),
+   and, if BREVO_API_KEY is set (Brevo free plan: 300 emails/day), the link is also emailed at once. */
+const RESET_MIN = 60;
+const phoneKey = v => { const d = String(v || '').replace(/\D/g, ''); return d.length >= 10 ? d.slice(-10) : ''; };
+const findByLogin = async (db, id) => {
+  const v = clean(id, 120).toLowerCase();
+  if (isEmail(v)) return db.collection('users').findOne({ email: v });
+  const p = phoneKey(v);
+  if (!p) return null;
+  return (await db.collection('users').find({ phone: { $regex: p + '$' } }).limit(2).toArray()).length === 1
+    ? db.collection('users').findOne({ phone: { $regex: p + '$' } }) : null;
+};
+const siteOf = req => { const u = new URL(req.url); return `${u.protocol}//${u.host}`; };
+async function makeResetLink(db, req, u) {
+  const token = crypto.getRandomValues(new Uint8Array(24)).reduce((a, b) => a + b.toString(16).padStart(2, '0'), '');
+  await db.collection('resets').updateMany({ userId: u._id, used: false }, { $set: { used: true } });
+  await db.collection('resets').insertOne({ _id: newId('r_'), userId: u._id, hash: hmacHex(process.env.JWT_SECRET || 'x', 'reset:' + token), exp: new Date(Date.now() + RESET_MIN * 60e3), used: false, createdAt: now() });
+  return `${siteOf(req)}/#reset-${token}`;
+}
+async function sendMail(to, subject, html) {
+  const key = process.env.BREVO_API_KEY, from = process.env.MAIL_FROM;
+  if (!key || !from) return false;
+  try {
+    const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': key, 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({ sender: { name: 'Learnify', email: from }, to: [{ email: to }], subject, htmlContent: html }) });
+    if (!r.ok) console.error('Mail error', r.status, await r.text());
+    return r.ok;
+  } catch (e) { console.error('Mail error', e); return false; }
+}
+
+on('POST', '/auth/forgot', async ({ db, req, body }) => {
+  const u = await findByLogin(db, body.id);
+  let emailed = false;
+  if (u && !u.blocked) {
+    const open = await db.collection('resetRequests').findOne({ userId: u._id, status: 'open' });
+    if (open) await db.collection('resetRequests').updateOne({ _id: open._id }, { $set: { updatedAt: now() } });
+    else await db.collection('resetRequests').insertOne({ _id: newId('q_'), userId: u._id, status: 'open', createdAt: now(), updatedAt: now() });
+    if (process.env.BREVO_API_KEY && (!u.lastResetMail || Date.now() - new Date(u.lastResetMail) > 2 * 60e3)) {
+      const link = await makeResetLink(db, req, u);
+      emailed = await sendMail(u.email, 'Reset your Learnify password',
+        `<p>Hi ${u.name.replace(/[<>&]/g, '')},</p><p>Tap the button to set a new password. The link works once and expires in ${RESET_MIN} minutes.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#5b1ff3;color:#fff;border-radius:10px;text-decoration:none">Set new password</a></p><p>If you did not ask for this, ignore this email.</p><p>Team Learnify</p>`);
+      await db.collection('users').updateOne({ _id: u._id }, { $set: { lastResetMail: now() } });
+    }
+  }
+  // Same answer whether or not the account exists, so this cannot be used to find accounts.
+  return json({ ok: true, emailed: !!process.env.BREVO_API_KEY });
+});
+
+on('POST', '/auth/reset', async ({ db, body }) => {
+  const token = clean(body.token, 80), pw = String(body.password || '');
+  if (pw.length < 8) throw httpError(400, 'Password must be at least 8 characters');
+  const r = token && await db.collection('resets').findOne({ hash: hmacHex(process.env.JWT_SECRET || 'x', 'reset:' + token) });
+  if (!r || r.used || new Date(r.exp) < now()) throw httpError(400, 'This reset link has expired or was already used. Please ask for a new one.');
+  const u = await db.collection('users').findOne({ _id: r.userId });
+  if (!u) throw httpError(400, 'Account not found');
+  await db.collection('resets').updateOne({ _id: r._id }, { $set: { used: true, usedAt: now() } });
+  await db.collection('users').updateOne({ _id: u._id }, { $set: { passwordHash: await hashPassword(pw), fails: 0, lockUntil: null, sv: (u.sv || 0) + 1 } });
+  await db.collection('resetRequests').updateMany({ userId: u._id, status: { $ne: 'done' } }, { $set: { status: 'done', doneAt: now() } });
+  return json({ ok: true, email: u.email });
+});
+
+on('GET', '/admin/resets', async ({ db }) => {
+  const qs = await db.collection('resetRequests').find({ status: { $in: ['open', 'sent'] } }).sort({ updatedAt: -1 }).limit(100).toArray();
+  const ppl = Object.fromEntries((await db.collection('users').find({ _id: { $in: qs.map(q => q.userId) } }).toArray()).map(u => [u._id, u]));
+  return json({ resets: qs.filter(q => ppl[q.userId]).map(q => { const u = ppl[q.userId]; return { id: q._id, d: q.updatedAt, status: q.status, name: u.name, email: u.email, phone: u.phone || '', av: u.avatar || '' }; }) });
+}, { admin: true });
+
+// Makes a one-time link for a request, or for any student by email/phone (when they message on WhatsApp).
+on('POST', '/admin/resets/link', async ({ db, req, body }) => {
+  let u = null, qid = clean(body.id, 40);
+  if (qid) { const q = await db.collection('resetRequests').findOne({ _id: qid }); if (q) u = await db.collection('users').findOne({ _id: q.userId }); }
+  else u = await findByLogin(db, body.login);
+  if (!u) throw httpError(404, 'No student found with this email or number');
+  const link = await makeResetLink(db, req, u);
+  if (qid) await db.collection('resetRequests').updateOne({ _id: qid }, { $set: { status: 'sent', sentAt: now() } });
+  return json({ link, name: u.name, phone: u.phone || '', email: u.email, minutes: RESET_MIN });
+}, { admin: true });
 
 /* ---------------- public site data ---------------- */
 function stripCourse(c, full) {
@@ -531,7 +613,7 @@ on('GET', '/admin/overview', async ({ db }) => {
     today: orders.filter(o => at(o) >= sod).reduce((a, o) => a + o.amount, 0),
     rev30: rev(m30, new Date(Date.now() + DAY)), revPrev30: rev(p30, m30),
     commission: cs.reduce((a, c) => a + c.amount, 0),
-    pendingPayouts: payouts, pendingKyc: kyc, series,
+    pendingPayouts: payouts, pendingKyc: kyc, pendingResets: await db.collection('resetRequests').countDocuments({ status: 'open' }), series,
     recent: recent.map(o => ({ ...(ppl[o.userId] || person(null)), title: o.title, amount: o.amount, d: at(o) })),
     topAffiliates: topA.map(([id, v]) => ({ ...(appl[id] || person(null)), v })),
     byCourse: Object.entries(byCourse).sort((a, b) => b[1] - a[1]).map(([t, v]) => ({ t, v }))

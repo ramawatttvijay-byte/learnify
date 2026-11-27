@@ -79,3 +79,55 @@ nav[aria-label="Main"] a{font-weight:500}
 
 /* ---------- jobs: heading in scale with the rest ---------- */
 #jobs h2,.jlist h2,[data-page="jobs"] h2{font-size:clamp(26px,3vw,34px)!important}
+
+/* ---------- login / signup / forgot / reset ---------- */
+.authcard{gap:8px}
+.authcard .afld{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.authcard .afld label{margin:0}
+.authcard .lrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.authcard .alink{border:0;background:none;padding:0;color:var(--p);font:600 14px var(--bd);cursor:pointer}
+.authcard .alink:hover{text-decoration:underline}
+.authcard .ahint{font-size:13px;color:var(--mute);line-height:1.45}
+.authcard .telin{display:flex;align-items:stretch;border:1.5px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden}
+.authcard .telin:focus-within{outline:3px solid #e4d8ff;border-color:var(--p)}
+.authcard .telin span{display:grid;place-items:center;padding:0 12px;font:600 15px var(--bd);color:var(--mute);background:var(--bg2);border-right:1.5px solid var(--line)}
+.authcard .telin input{border:0;border-radius:0;flex:1;min-width:0;outline:0}
+.authcard .pwin{position:relative;display:flex}
+.authcard .pwin input{flex:1;padding-right:52px}
+.authcard .eye{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:44px;height:44px;border:0;background:none;border-radius:10px;color:var(--mute);cursor:pointer;display:grid;place-items:center}
+.authcard .eye svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.authcard .eye[aria-pressed="true"]{color:var(--p)}
+.authcard .eye[aria-pressed="true"] svg{opacity:.55}
+.pwmeter{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:2px}
+.pwmeter i{height:4px;border-radius:4px;background:var(--line);transition:background .25s}
+.pwmeter[data-s="1"] i:nth-child(1){background:#e5484d}
+.pwmeter[data-s="2"] i:nth-child(-n+2){background:#f5a524}
+.pwmeter[data-s="3"] i{background:#12a150}
+.authcard .aswap{text-align:center;font-size:14px;color:var(--mute);margin-top:4px}
+.authcard .aterms{text-align:center;font-size:12px;color:var(--mute)}
+.authcard .err:empty{display:none}
+.authok{border-radius:14px;padding:16px;background:rgba(18,161,80,.08);border:1px solid rgba(18,161,80,.25);display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.5}
+.authok b{font:600 16px var(--hd);color:#0f7a43}
+.authok p{margin:0;color:var(--ink)}
+.authok .btn{align-self:flex-start;min-height:44px;margin-top:4px}
+[data-theme="dark"] .authok b{color:#4ade80}
+@media(max-width:520px){.authcard{padding:24px 18px;border-radius:20px}.phead .authcard h1{font-size:28px}}
+
+/* ---------- dashboard: admin shortcut, security page ---------- */
+.dash2 .admgo{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:10px 12px;border-radius:12px;background:linear-gradient(135deg,rgba(91,31,243,.12),rgba(166,14,239,.08));color:var(--ink);font-weight:600;text-decoration:none;border:1px solid rgba(91,31,243,.2)}
+.dash2 .admgo svg{width:18px;height:18px}
+.dash2 .admgo em{margin-left:auto;font:600 11px var(--bd);font-style:normal;letter-spacing:.06em;text-transform:uppercase;color:#5b1ff3;background:rgba(91,31,243,.12);padding:3px 8px;border-radius:99px}
+.dash2 .secg{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}
+.dash2 .secl{list-style:none;margin:8px 0 14px;padding:0;display:flex;flex-direction:column}
+.dash2 .secl li{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.dash2 .secl li span{color:var(--mute)}
+.dash2 .sm2{font-size:13.5px;line-height:1.5;margin:4px 0 12px}
+@media(max-width:860px){.dash2 .secg{grid-template-columns:1fr}}
+#admin .rsf{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+#admin .rsf input{flex:1;min-width:220px;min-height:46px;border:1.5px solid var(--line);border-radius:12px;padding:0 14px;font:15px var(--bd);background:var(--card);color:var(--ink)}
+#admin .rsf .btn{min-height:46px}
+.authcard [hidden],.authok[hidden]{display:none!important}
+.authcard #authBtn{align-self:stretch}
+.authcard{box-sizing:border-box;min-width:0}
+.authcard>*,.authcard .afld>*{min-width:0;max-width:100%;box-sizing:border-box}
+.authcard input{width:100%;min-width:0;box-sizing:border-box}

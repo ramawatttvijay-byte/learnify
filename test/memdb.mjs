@@ -7,6 +7,7 @@ function match(doc, q) {
     if (v && typeof v === 'object' && !(v instanceof Date) && !Array.isArray(v)) {
       return Object.entries(v).every(([op, val]) => {
         if (op === '$ne') return x !== val;
+        if (op === '$regex') return typeof x === 'string' && new RegExp(val).test(x);
         if (op === '$in') return val.includes(x);
         if (op === '$gte') return x != null && cmp(x, val) >= 0;
         if (op === '$lt') return x != null && cmp(x, val) < 0;
@@ -32,6 +33,7 @@ class Col {
   async insertOne(d) { if (this.docs.has(d._id)) throw new Error('dup key'); this.docs.set(d._id, clone(d)); return { insertedId: d._id }; }
   async countDocuments(q = {}) { return [...this.docs.values()].filter(d => match(d, q)).length; }
   async deleteOne(q) { for (const [k, d] of this.docs) if (match(d, q)) { this.docs.delete(k); return { deletedCount: 1 }; } return { deletedCount: 0 }; }
+  async updateMany(q, u) { let n = 0; for (const d of this.docs.values()) if (match(d, q)) { Object.assign(d, clone(u.$set || {})); n++; } return { matchedCount: n, modifiedCount: n }; }
   async updateOne(q, u, opt = {}) {
     for (const [k, d] of this.docs) if (match(d, q)) {
       Object.assign(d, clone(u.$set || {}));

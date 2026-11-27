@@ -543,13 +543,13 @@ footer nav a{text-decoration:none}
 
 </style>
 <link rel="stylesheet" href="css/app.css?v=202611250622">
-<script src="js/backend.js?v=202611280115"></script>
+<script src="js/backend.js?v=202611280215"></script>
 <link rel="stylesheet" href="css/apple.css?v=202611250622">
 <link rel="stylesheet" href="css/watch.css?v=202611250622">
 <link rel="stylesheet" href="css/dash.css?v=202611250622">
 <link rel="stylesheet" href="css/pro.css?v=202611250622">
 <link rel="stylesheet" href="css/cf.css?v=202611250622">
-<link rel="stylesheet" href="css/finish.css?v=202611251130">
+<link rel="stylesheet" href="css/finish.css?v=202611280250">
 </head>
 <body>
 
@@ -825,16 +825,22 @@ footer nav a{text-decoration:none}
     <form class="authcard" id="loginForm" novalidate>
       <h1 id="authTitle">Welcome back</h1>
       <p class="lead" id="authLead">Log in to your Learnify account.</p>
-      <div class="authsw" role="tablist"><button type="button" data-mode="login" aria-selected="true">Log in</button><button type="button" data-mode="signup" aria-selected="false">Create account</button></div>
-      <div class="sgonly" hidden><label for="ln">Full name</label><input id="ln" autocomplete="name" placeholder="Your name"></div>
-      <label for="le">Email</label>
-      <input id="le" type="email" placeholder="you@gmail.com" autocomplete="email" required>
-      <div class="sgonly" hidden><label for="lph">WhatsApp number</label><input id="lph" inputmode="tel" autocomplete="tel" placeholder="10-digit number"></div>
-      <label for="lp">Password</label>
-      <input id="lp" type="password" placeholder="At least 8 characters" autocomplete="current-password" required>
+      <div class="authsw" role="tablist" id="authSw"><button type="button" data-mode="login" aria-selected="true">Log in</button><button type="button" data-mode="signup" aria-selected="false">Create account</button></div>
+      <div class="authok" id="authOk" hidden></div>
+      <div class="afld m-signup"><label for="ln">Full name</label><input id="ln" autocomplete="name" placeholder="Your full name" maxlength="80"></div>
+      <div class="afld m-login m-signup m-forgot"><label for="le" id="leL">Email or WhatsApp number</label><input id="le" type="text" placeholder="you@gmail.com or 98XXXXXXXX" autocomplete="username" autocapitalize="off" spellcheck="false" maxlength="120"></div>
+      <div class="afld m-signup"><label for="lph">WhatsApp number</label><div class="telin"><span>+91</span><input id="lph" inputmode="numeric" autocomplete="tel-national" placeholder="10-digit number" maxlength="14"></div><small class="ahint">Class links, updates and password help come here.</small></div>
+      <div class="afld m-login m-signup m-reset"><div class="lrow"><label for="lp" id="lpL">Password</label><button type="button" class="alink m-login" data-mode="forgot">Forgot password?</button></div>
+        <div class="pwin"><input id="lp" type="password" placeholder="Your password" autocomplete="current-password" maxlength="200"><button type="button" class="eye" id="lpEye" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+        <div class="pwmeter m-signup m-reset" id="pwM" aria-hidden="true"><i></i><i></i><i></i></div><small class="ahint m-signup m-reset" id="pwH">At least 8 characters. A mix of letters and numbers is stronger.</small></div>
+      <div class="afld m-reset"><label for="lp2">Confirm new password</label><input id="lp2" type="password" placeholder="Type it again" autocomplete="new-password" maxlength="200"></div>
+      <p class="ahint m-signup" id="refNote" hidden></p>
       <button class="btn btn-main" id="authBtn" type="submit" style="width:100%;min-height:52px">Log in</button>
       <p id="lerr" class="err" role="alert"></p>
-      <p class="demo" id="authNote">Forgot your password? Message us on WhatsApp and we'll reset it.</p>
+      <p class="aswap m-login">New to Learnify? <button type="button" class="alink" data-mode="signup">Create an account</button></p>
+      <p class="aswap m-signup">Already have an account? <button type="button" class="alink" data-mode="login">Log in</button></p>
+      <p class="aswap m-forgot m-reset"><button type="button" class="alink" data-mode="login">← Back to log in</button></p>
+      <p class="aterms m-signup">By creating an account you agree to Learnify's terms and privacy policy.</p>
     </form>
   </div>
 </section>
@@ -851,7 +857,7 @@ footer nav a{text-decoration:none}
     <span class="kick">Learnify admin</span>
     <h1>Manage your website</h1>
     <p class="lead">Upload courses and lessons, add student reviews and team photos. Changes go live on the site as soon as you save.</p>
-    <div class="atabs" role="tablist"><button type="button" role="tab" data-t="overview" aria-selected="true">Overview</button><button type="button" role="tab" data-t="orders" aria-selected="false">Orders</button><button type="button" role="tab" data-t="students" aria-selected="false">Students</button><button type="button" role="tab" data-t="payouts" aria-selected="false">Payouts</button><button type="button" role="tab" data-t="kycs" aria-selected="false">KYC</button><button type="button" role="tab" data-t="courses" aria-selected="false">Courses &amp; lessons</button><button type="button" role="tab" data-t="reviews" aria-selected="false">Reviews</button><button type="button" role="tab" data-t="packages" aria-selected="false">Packages</button><button type="button" role="tab" data-t="jobs" aria-selected="false">Jobs</button><button type="button" role="tab" data-t="missions" aria-selected="false">Missions</button><button type="button" role="tab" data-t="settings" aria-selected="false">Team &amp; WhatsApp</button><button type="button" role="tab" data-t="social" aria-selected="false">Social links</button></div>
+    <div class="atabs" role="tablist"><button type="button" role="tab" data-t="overview" aria-selected="true">Overview</button><button type="button" role="tab" data-t="orders" aria-selected="false">Orders</button><button type="button" role="tab" data-t="students" aria-selected="false">Students</button><button type="button" role="tab" data-t="payouts" aria-selected="false">Payouts</button><button type="button" role="tab" data-t="kycs" aria-selected="false">KYC</button><button type="button" role="tab" data-t="resets" aria-selected="false">Password help</button><button type="button" role="tab" data-t="courses" aria-selected="false">Courses &amp; lessons</button><button type="button" role="tab" data-t="reviews" aria-selected="false">Reviews</button><button type="button" role="tab" data-t="packages" aria-selected="false">Packages</button><button type="button" role="tab" data-t="jobs" aria-selected="false">Jobs</button><button type="button" role="tab" data-t="missions" aria-selected="false">Missions</button><button type="button" role="tab" data-t="settings" aria-selected="false">Team &amp; WhatsApp</button><button type="button" role="tab" data-t="social" aria-selected="false">Social links</button></div>
     <div id="admBody"></div>
   </div>
 </section>
@@ -1171,20 +1177,48 @@ let memUser=null;
 function getUser(){if(window.LFAPI)return LFAPI.me();if(memUser)return memUser;const u=store.get('lf_user');if(u){try{memUser=JSON.parse(u)}catch(e){}}return memUser}
 function fillDash(){const u=getUser();const nl=document.getElementById('navLogin');if(!u){nl.textContent='Login | Register';nl.href='#login';return}nl.textContent='My Dashboard';nl.href='#dashboard';}
 async function logout(){if(window.LFAPI)await LFAPI.logout();memUser=null;store.del('lf_user');location.hash='#login';location.reload()}
-{let mode='login';const f=document.getElementById('loginForm');
- const setMode=m=>{mode=m;f.querySelectorAll('.authsw button').forEach(b=>b.setAttribute('aria-selected',b.dataset.mode===m));f.querySelectorAll('.sgonly').forEach(x=>x.hidden=m!=='signup');
-  document.getElementById('authTitle').textContent=m==='signup'?'Create your account':'Welcome back';document.getElementById('authLead').textContent=m==='signup'?'Join Learnify to enrol, learn and earn.':'Log in to your Learnify account.';
-  document.getElementById('authBtn').textContent=m==='signup'?'Create account':'Log in';document.getElementById('lp').autocomplete=m==='signup'?'new-password':'current-password';document.getElementById('lerr').textContent=''};
- f.querySelectorAll('.authsw button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
- f.addEventListener('submit',async e=>{e.preventDefault();const er=document.getElementById('lerr'),btn=document.getElementById('authBtn');
-  const em=document.getElementById('le').value.trim(),pw=document.getElementById('lp').value;
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){er.textContent='Please enter a valid email.';return}
-  if(mode==='signup'){if(document.getElementById('ln').value.trim().length<2){er.textContent='Please enter your name.';return}if(pw.length<8){er.textContent='Password must be at least 8 characters.';return}}
-  if(!window.LFAPI){er.textContent='Login is not available in this preview.';return}
+{let mode='login',resetToken='';const f=document.getElementById('loginForm'),$=id=>document.getElementById(id);
+ const T={login:['Welcome back','Log in to your Learnify account.','Log in'],signup:['Create your account','Join Learnify to learn skills and start earning.','Create account'],
+  forgot:['Forgot password?','Enter the email or WhatsApp number on your account. We will send you a link to set a new password.','Send reset link'],reset:['Set a new password','Choose a new password for your Learnify account.','Save new password']};
+ const setMode=m=>{mode=m;f.dataset.mode=m;$('authSw').hidden=m==='forgot'||m==='reset';$('authOk').hidden=true;
+  f.querySelectorAll('.authsw button').forEach(b=>b.setAttribute('aria-selected',b.dataset.mode===m));
+  f.querySelectorAll('[class*="m-"]').forEach(x=>{const ms=[...x.classList].filter(c=>c.startsWith('m-'));if(ms.length)x.hidden=!ms.includes('m-'+m)});
+  [$('authTitle').textContent,$('authLead').textContent,$('authBtn').textContent]=T[m];
+  const le=$('le');le.type=m==='signup'?'email':'text';le.placeholder=m==='signup'?'you@gmail.com':'you@gmail.com or 98XXXXXXXX';le.autocomplete=m==='signup'?'email':'username';
+  $('leL').textContent=m==='signup'?'Email':'Email or WhatsApp number';$('lpL').textContent=m==='reset'?'New password':'Password';
+  $('lp').autocomplete=m==='login'?'current-password':'new-password';$('lp').placeholder=m==='login'?'Your password':'At least 8 characters';
+  $('lerr').textContent='';$('authBtn').disabled=false;
+  if(m==='signup'){let r='';try{r=localStorage.getItem('lf_ref')||''}catch(e){}$('refNote').hidden=!r;if(r)$('refNote').textContent='Referral code '+r+' will be added to your account.'}
+  setTimeout(()=>{const x=f.querySelector('.afld:not([hidden]) input');if(x&&matchMedia('(hover:hover)').matches)x.focus()},30)};
+ window.__lfAuthMode=setMode;
+ f.addEventListener('click',e=>{const b=e.target.closest('button[data-mode]');if(b){e.preventDefault();setMode(b.dataset.mode)}});
+ $('lpEye').addEventListener('click',e=>{const on=$('lp').type==='password';$('lp').type=on?'text':'password';$('lp2').type=$('lp').type;e.currentTarget.setAttribute('aria-pressed',on);e.currentTarget.setAttribute('aria-label',on?'Hide password':'Show password')});
+ const score=p=>!p?0:p.length<8?1:(/[a-z]/i.test(p)+/\d/.test(p)+/[^a-z\d]/i.test(p)+(p.length>=12))>=3?3:2;
+ $('lp').addEventListener('input',()=>{const sc=score($('lp').value);$('pwM').dataset.s=sc;$('pwH').textContent=['At least 8 characters. A mix of letters and numbers is stronger.','Too short: use at least 8 characters.','Good. Add a number or symbol to make it stronger.','Strong password.'][sc]});
+ $('lph').addEventListener('input',e=>{e.target.value=e.target.value.replace(/[^\d ]/g,'')});
+ const done=(html)=>{const o=$('authOk');o.innerHTML=html;o.hidden=false;f.querySelectorAll('.afld,#authBtn,#refNote').forEach(x=>x.hidden=true)};
+ f.addEventListener('submit',async e=>{e.preventDefault();const er=$('lerr'),btn=$('authBtn'),id=$('le').value.trim(),pw=$('lp').value;
+  const isMail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id),digits=id.replace(/\D/g,'');
+  const fail=t=>{er.textContent=t;return false};
+  if(mode==='login'&&(!id||(!isMail&&digits.length<10)))return fail('Enter your email or 10-digit WhatsApp number.');
+  if(mode==='login'&&!pw)return fail('Enter your password.');
+  if(mode==='signup'){if($('ln').value.trim().length<2)return fail('Please enter your full name.');if(!isMail)return fail('Please enter a valid email.');
+   const ph=$('lph').value.replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,'');if(!/^[6-9]\d{9}$/.test(ph))return fail('Please enter a valid 10-digit WhatsApp number.');if(pw.length<8)return fail('Password must be at least 8 characters.')}
+  if(mode==='forgot'&&!isMail&&digits.length<10)return fail('Enter your email or 10-digit WhatsApp number.');
+  if(mode==='reset'){if(pw.length<8)return fail('Password must be at least 8 characters.');if(pw!==$('lp2').value)return fail('The two passwords do not match.')}
+  if(!window.LFAPI)return fail('Login is not available in this preview.');
   er.textContent='';btn.disabled=true;const old=btn.textContent;btn.textContent='Please wait…';
-  try{const u=mode==='signup'?await LFAPI.signup({name:document.getElementById('ln').value.trim(),email:em,phone:document.getElementById('lph').value.trim(),password:pw}):await LFAPI.login(em,pw);
-   memUser=u;let after=null;try{after=sessionStorage.getItem('lf_after')}catch(_){}location.hash=after?'#home':'#dashboard';location.reload();}
-  catch(err){er.textContent=err.message;btn.disabled=false;btn.textContent=old}});}
+  try{
+   if(mode==='forgot'){const r=await LFAPI.j('/auth/forgot',{method:'POST',body:JSON.stringify({id})});const w=LF.waLink('Hi Learnify, I forgot my password. My account: '+id);
+    done(`<b>Request received</b><p>If an account matches <strong>${esc(id)}</strong>, ${r.emailed?'a reset link has been emailed to it. The Learnify team can also send it to your WhatsApp.':'the Learnify team will send a reset link to its WhatsApp number shortly.'} The link works once and expires in 1 hour.</p>${w?`<a class="btn btn-main" href="${esc(w)}" target="_blank" rel="noopener">Get it faster on WhatsApp</a>`:''}`);btn.textContent=old;return}
+   if(mode==='reset'){const r=await LFAPI.j('/auth/reset',{method:'POST',body:JSON.stringify({token:resetToken,password:pw})});history.replaceState(null,'','#login');setMode('login');$('le').value=r.email||'';$('lp').value='';
+    const o=$('authOk');o.innerHTML='<b>Password updated</b><p>Log in with your new password.</p>';o.hidden=false;btn.textContent=T.login[2];return}
+   const ph=$('lph').value.replace(/\D/g,'').replace(/^(91|0)(?=\d{10}$)/,'');
+   const u=mode==='signup'?await LFAPI.signup({name:$('ln').value.trim(),email:id.toLowerCase(),phone:'+91'+ph,password:pw}):await LFAPI.login(id,pw);
+   memUser=u;let after=null;try{after=sessionStorage.getItem('lf_after')}catch(_){}location.hash=after?'#home':(u&&u.role==='admin'?'#admin':'#dashboard');location.reload();}
+  catch(err){er.textContent=err.message;btn.disabled=false;btn.textContent=old}});
+ window.__lfResetRoute=tok=>{resetToken=tok;setMode('reset')};
+ setMode('login');}
 fillDash();
 const dbWait=[];
 window.LF={S,esc,blob,safeUrl,priceTxt,thumbOf,visible,allCourses,getC,getUser,waLink,logout,msg,upload,route:()=>route(),curPage:()=>PAGE,onDb(f){if(S.db)f(S.db);else dbWait.push(f)}};
@@ -1196,9 +1230,11 @@ function route(){
   let page=pages.includes(h)?h:null, target=null;
   const wt=h.match(/^watch-([a-z0-9-]+)(?:\/(\d+))?$/);if(wt)page='watch';
   const vf=h.match(/^verify-(LF-[0-9A-Fa-f]{10})$/);if(vf)page='verify';
+  const rs=h.match(/^reset-([0-9a-f]{40,80})$/);if(rs){page='login';setTimeout(()=>window.__lfResetRoute&&__lfResetRoute(rs[1]),0)}
   if(/^dash-[a-z0-9-]+$/.test(h))page='dashboard';
   if(page==='dashboard'&&!getUser()){if(window.LFAPI&&!LFAPI.isReady){LFAPI.ready.then(route);return}location.hash='#login';return}
-  if(page==='login'&&getUser()){location.hash='#dashboard';return}
+  if(page==='login'&&getUser()&&!rs){location.hash='#dashboard';return}
+  if(h==='login'&&window.__lfAuthMode&&document.getElementById('loginForm').dataset.mode==='reset')__lfAuthMode('login');
   if(page==='admin'&&window.LFAPI&&!LFAPI.isReady){LFAPI.ready.then(route);return}
   if(h==='meta-ads'){location.replace('#course-meta-ads');return}
   if(/^course-[a-z0-9-]+$/.test(h)){page='course';renderCourse(h.slice(7))}
@@ -1275,7 +1311,7 @@ document.getElementById('lf').addEventListener('submit',e=>{
 </script>
 
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll(".stack td:not([data-l])")){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest("table").rows[0].cells[i]?.textContent||""}}).observe(document,{childList:true,subtree:true})</script>
-<script src="js/app.js?v=202611250622"></script>
+<script src="js/app.js?v=202611280250"></script>
 <script src="js/watch.js?v=202611250622"></script>
 <script src="js/apple.js?v=202611250622"></script>
 </body>
