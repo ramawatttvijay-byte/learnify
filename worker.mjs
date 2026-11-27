@@ -57,6 +57,17 @@ export default {
       }
       return res;
     }
-    return env.ASSETS.fetch(request);
+    if (url.pathname === '/robots.txt')
+      return new Response(`User-agent: *\nAllow: /\nDisallow: /api/\nSitemap: ${url.origin}/sitemap.xml\n`, { headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    if (url.pathname === '/sitemap.xml')
+      return new Response(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${url.origin}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url></urlset>\n`, { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
+    const res = await env.ASSETS.fetch(request);
+    // Share previews and search engines need absolute links: fill in whichever domain the site runs on.
+    if ((url.pathname === '/' || url.pathname === '/index.html') && res.ok && (res.headers.get('content-type') || '').includes('text/html')) {
+      const html = (await res.text()).replaceAll('__ORIGIN__', url.origin);
+      const h = new Headers(res.headers); h.delete('content-length');
+      return new Response(html, { status: res.status, headers: h });
+    }
+    return res;
   }
 };
