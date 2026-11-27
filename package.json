@@ -2,7 +2,14 @@
   "name": "learnify",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=20" },
-  "scripts": { "test": "node --test test/api.test.mjs" },
-  "dependencies": { "mongodb": "^6.10.0" }
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node tools/build-css.mjs",
+    "test": "node --test test/api.test.mjs test/build.test.mjs"
+  },
+  "dependencies": {
+    "mongodb": "^6.10.0"
+  }
 }

@@ -97,3 +97,72 @@ html.inapp .prog{display:none}
 .walc .wbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#8b5cf6,#d946ef)}
 .walc .wprog small{font-size:12.5px;line-height:1.45;color:rgba(255,255,255,.6)}
 .walc.big .wprog{display:none}
+
+/* =========================================================
+   Admin panel as a full-screen app (same shell as the student dashboard)
+   ========================================================= */
+html.inadmin body>nav,html.inadmin footer.ft3,html.inadmin #mbar,html.inadmin .prog{display:none!important}
+html.inadmin body{padding-bottom:0!important;background:var(--bg2)}
+html.inadmin{--navh:0px}
+#admin.adm{padding:0!important;min-height:100vh;background:var(--bg2)}
+#admin .admapp{display:grid;grid-template-columns:256px minmax(0,1fr);min-height:100vh}
+#admin .admside{position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column;gap:2px;padding:18px 14px;background:var(--card);border-right:1px solid var(--line)}
+#admin .admbrand{display:flex;align-items:center;gap:10px;padding:2px 8px 14px;margin-bottom:6px;border-bottom:1px solid var(--line);text-decoration:none}
+#admin .admbrand img{height:30px;width:auto}
+#admin .admbrand .lg-d,[data-theme="dark"] #admin .admbrand .lg-l{display:none}
+[data-theme="dark"] #admin .admbrand .lg-d{display:block}
+#admin .admbrand em{font:600 11px var(--ui,var(--bd));font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:#5b1ff3;background:rgba(91,31,243,.1);padding:4px 8px;border-radius:99px}
+#admin .atabs{display:flex;flex-direction:column;gap:2px;margin:0;flex-wrap:nowrap}
+#admin .asg{font:600 11px var(--ui,var(--bd));letter-spacing:.08em;text-transform:uppercase;color:var(--faint,var(--mute));padding:16px 12px 6px}
+#admin .atabs button{display:flex;align-items:center;gap:11px;min-height:38px;padding:0 12px;border:0;border-radius:9px;background:none;color:var(--ink2,var(--ink));font:500 14.5px var(--ui,var(--bd));text-align:left;position:relative;cursor:pointer;transition:background-color .2s,color .2s}
+#admin .atabs button svg,#admin .admlinks svg{width:18px;height:18px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--faint,var(--mute))}
+#admin .atabs button:hover{background:var(--bg2);color:var(--ink)}
+#admin .atabs button[aria-selected="true"]{background:var(--bg2);color:var(--ink);font-weight:600;box-shadow:inset 0 0 0 1px var(--line)}
+#admin .atabs button[aria-selected="true"] svg{color:#5b1ff3}
+#admin .atabs button[aria-selected="true"]::before{content:"";position:absolute;left:-14px;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:linear-gradient(#4b1ff5,#a60eef)}
+#admin .admlinks{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:2px}
+#admin .admlinks a{display:flex;align-items:center;gap:11px;min-height:38px;padding:0 12px;border-radius:9px;color:var(--mute);text-decoration:none;font:500 14px var(--ui,var(--bd))}
+#admin .admlinks a:hover{background:var(--bg2);color:var(--ink)}
+#admin .admmain{min-width:0;display:flex;flex-direction:column}
+#admin .admtop{position:sticky;top:0;z-index:20;padding:22px clamp(16px,3vw,40px) 18px;background:color-mix(in srgb,var(--bg2) 84%,transparent);backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-bottom:1px solid var(--line)}
+#admin .admtop small{font:500 13px var(--ui,var(--bd));color:var(--mute)}
+#admin .admtop h1{font:600 clamp(22px,2.2vw,28px)/1.15 var(--hd);letter-spacing:-.02em;margin:2px 0 4px}
+#admin .admtop p{margin:0;color:var(--mute);font-size:14.5px}
+#admin #admBody{padding:24px clamp(16px,3vw,40px) 64px;max-width:1320px;width:100%;font-size:15px}
+#admin .cardp h2{font:600 17px/1.3 var(--hd);letter-spacing:-.015em}
+#admin .alert3 svg{width:18px!important;height:18px!important;flex:none}
+#admin .alert3{display:flex;align-items:center;gap:12px}
+#admin .alert3 a{margin-left:auto;white-space:nowrap}
+#admin .lock{padding:80px 20px;text-align:center}
+@media(max-width:960px){
+ #admin .admapp{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start}
+ #admin .admside{position:sticky;top:0;z-index:25;height:auto;flex-direction:row;align-items:center;gap:8px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+ #admin .admbrand{padding:0;margin:0;border:0;flex:none}
+ #admin .admbrand img{height:26px}
+ #admin .admbrand em{display:none}
+ #admin .atabs{flex-direction:row;overflow-x:auto;scrollbar-width:none;gap:6px;flex:1;min-width:0;padding:2px}
+ #admin .atabs::-webkit-scrollbar{display:none}
+ #admin .asg{display:none}
+ #admin .atabs button{flex:none;min-height:36px;padding:0 12px;border-radius:99px;background:var(--bg2);font-size:13.5px;white-space:nowrap}
+ #admin .atabs button svg{display:none}
+ #admin .atabs button[aria-selected="true"]{background:#14123a;color:#fff;box-shadow:none}
+ [data-theme="dark"] #admin .atabs button[aria-selected="true"]{background:#fff;color:#14123a}
+ #admin .atabs button[aria-selected="true"]::before{display:none}
+ #admin .admlinks{display:none}
+ #admin .admtop{position:static;padding:18px 16px 14px;background:none;backdrop-filter:none}
+ #admin #admBody{padding:16px 14px 48px}
+}
+@media(max-width:700px){
+ #admin .adm-ov{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px}
+ #admin .adm-ov>*{grid-column:1/-1!important}
+ #admin .adm-ov>.kpx{grid-column:span 1!important;padding:14px}
+ #admin .kpx b{font-size:22px}
+ #admin .kpx em{font-size:11.5px}
+}
+@media(max-width:700px){
+ #admin .arow{flex-wrap:wrap;row-gap:8px;column-gap:10px;padding:12px 0}
+ #admin .arow>.who{flex:1 1 100%;min-width:0}
+ #admin .arow>:not(.who){flex:0 0 auto!important;text-align:left!important;font-size:13px}
+ #admin .arow>.amt3{margin-left:auto}
+ #admin .arow .bs{margin-left:auto}
+}

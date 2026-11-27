@@ -27,7 +27,7 @@
 <link rel="preload" as="image" href="hero-girl.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#ffffff" id="metaTheme">
 <script>(function(){var t;try{t=localStorage.getItem('lf_theme')}catch(e){}if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t;})()</script>
 <style>
@@ -562,16 +562,8 @@ footer nav a{text-decoration:none}
 @media(max-width:860px){.ftg{grid-template-columns:repeat(2,minmax(0,1fr))}.ftb{grid-column:1/-1}}
 
 </style>
-<link rel="stylesheet" href="css/app.css?v=202611250622">
+<link rel="stylesheet" href="css/site.css?v=3454a73956">
 <script src="js/backend.js?v=202611280215"></script>
-<link rel="stylesheet" href="css/apple.css?v=202611250622">
-<link rel="stylesheet" href="css/watch.css?v=202611250622">
-<link rel="stylesheet" href="css/dash.css?v=202611250622">
-<link rel="stylesheet" href="css/pro.css?v=202611250622">
-<link rel="stylesheet" href="css/cf.css?v=202611250622">
-<link rel="stylesheet" href="css/finish.css?v=202611280420">
-<link rel="stylesheet" href="css/app2.css?v=202611280350">
-<link rel="stylesheet" href="css/polish.css?v=202611280535">
 </head>
 <body>
 
@@ -905,12 +897,16 @@ footer nav a{text-decoration:none}
 <section data-page="watch" id="watch" hidden><div id="watchRoot"></div></section>
 <div class="mbar" id="mbar" hidden></div>
 <section class="adm" data-page="admin" id="admin">
-  <div class="wrap">
-    <span class="kick">Learnify admin</span>
-    <h1>Manage your website</h1>
-    <p class="lead">Upload courses and lessons, add student reviews and team photos. Changes go live on the site as soon as you save.</p>
-    <div class="atabs" role="tablist"><button type="button" role="tab" data-t="overview" aria-selected="true">Overview</button><button type="button" role="tab" data-t="orders" aria-selected="false">Orders</button><button type="button" role="tab" data-t="students" aria-selected="false">Students</button><button type="button" role="tab" data-t="payouts" aria-selected="false">Payouts</button><button type="button" role="tab" data-t="kycs" aria-selected="false">KYC</button><button type="button" role="tab" data-t="resets" aria-selected="false">Password help</button><button type="button" role="tab" data-t="courses" aria-selected="false">Courses &amp; lessons</button><button type="button" role="tab" data-t="reviews" aria-selected="false">Reviews</button><button type="button" role="tab" data-t="packages" aria-selected="false">Packages</button><button type="button" role="tab" data-t="jobs" aria-selected="false">Jobs</button><button type="button" role="tab" data-t="missions" aria-selected="false">Missions</button><button type="button" role="tab" data-t="settings" aria-selected="false">Team &amp; WhatsApp</button><button type="button" role="tab" data-t="social" aria-selected="false">Social links</button></div>
-    <div id="admBody"></div>
+  <div class="admapp">
+    <aside class="admside" aria-label="Admin menu">
+      <a class="admbrand" href="#home" aria-label="Learnify home"><img src="logo.webp" alt="Learnify" class="lg-l"><img src="logo-dark.webp" alt="" class="lg-d" aria-hidden="true"><em>Admin</em></a>
+      <div class="atabs" role="tablist" aria-label="Admin sections"><div class="asg">Business</div><button type="button" role="tab" data-t="overview" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 13h8V3H3zM13 21h8v-8h-8zM13 3v6h8V3zM3 21h8v-4H3z"/></svg><span>Overview</span></button><button type="button" role="tab" data-t="orders" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span>Orders</span></button><button type="button" role="tab" data-t="students" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>Students</span></button><button type="button" role="tab" data-t="payouts" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Payouts</span></button><button type="button" role="tab" data-t="kycs" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17a3.5 3.5 0 0 1 7 0M15 9h3M15 13h3"/></svg><span>KYC</span></button><button type="button" role="tab" data-t="resets" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>Password help</span></button><div class="asg">Content</div><button type="button" role="tab" data-t="courses" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg><span>Courses & lessons</span></button><button type="button" role="tab" data-t="reviews" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.5 6 .9-4.4 4.2 1 6L12 16.8 6.6 19.6l1-6L3.3 9.4l6-.9z"/></svg><span>Reviews</span></button><button type="button" role="tab" data-t="packages" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg><span>Packages</span></button><button type="button" role="tab" data-t="jobs" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Jobs</span></button><button type="button" role="tab" data-t="missions" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 22V4M4 4h13l-2 4 2 4H4"/></svg><span>Missions</span></button><div class="asg">Settings</div><button type="button" role="tab" data-t="settings" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Team & WhatsApp</span></button><button type="button" role="tab" data-t="social" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg><span>Social links</span></button></div>
+      <div class="admlinks"><a href="#home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>View website</span></a><a href="#dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg><span>My dashboard</span></a></div>
+    </aside>
+    <main class="admmain">
+      <header class="admtop"><div><small id="admGrp">Business</small><h1 id="admTtl">Overview</h1><p id="admSub">Revenue, students and what needs your attention today.</p></div></header>
+      <div id="admBody"></div>
+    </main>
   </div>
 </section>
 <dialog id="vd" aria-label="Lesson video"><header><span id="vdT"></span><button type="button" id="vdX">Close</button></header><video id="vdV" controls playsinline controlslist="nodownload" oncontextmenu="return false"></video><div class="dvw" hidden><iframe id="vdF" title="Lesson video" allow="autoplay; fullscreen" allowfullscreen></iframe><span class="dvblock" aria-hidden="true"></span></div></dialog>
@@ -1117,6 +1113,7 @@ function renderAdmin(){
   const box=document.getElementById('admBody');
   if(!S.admin){box.innerHTML=`<div class="lock"><h2>Admin only</h2><p class="lead" style="margin:12px auto">Only Learnify editors can open this page.</p><a class="btn btn-main" href="#home">Back to home</a></div>`;return}
   document.querySelectorAll('.atabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===aTab));
+  {const M={"overview": ["Business", "Overview", "Revenue, students and what needs your attention today."], "orders": ["Business", "Orders", "Every payment made on Learnify."], "students": ["Business", "Students", "Everyone with an account. Give or remove course access by hand."], "payouts": ["Business", "Payouts", "Withdrawal requests from affiliates. Pay them, then mark as paid."], "kycs": ["Business", "KYC", "PAN and bank details affiliates submitted for payouts."], "resets": ["Business", "Password help", "Send one-time reset links to students on WhatsApp."], "courses": ["Content", "Courses & lessons", "Edit course details, price, thumbnail and Google Drive lessons."], "reviews": ["Content", "Reviews", "Student reviews shown on the website."], "packages": ["Content", "Packages", "Plans shown on the pricing page."], "jobs": ["Content", "Jobs", "Openings shown on the jobs page."], "missions": ["Content", "Missions", "Goals and rewards in the student dashboard."], "settings": ["Settings", "Team & WhatsApp", "Team photos and the WhatsApp number for enquiries."], "social": ["Settings", "Social links", "Links shown in the footer and contact page."]},m=M[aTab]||['','',''];document.getElementById('admGrp').textContent=m[0];document.getElementById('admTtl').textContent=m[1];document.getElementById('admSub').textContent=m[2];const sb=document.querySelector('.atabs button[aria-selected="true"]');if(sb&&innerWidth<960){const st=sb.parentElement;st.scrollLeft=sb.offsetLeft-(st.clientWidth-sb.offsetWidth)/2}}
   if(aTab==='courses')adminCourses(box);else if(aTab==='reviews')adminReviews(box);else if(aTab==='settings')adminSettings(box);else if(window.LFApp&&LFApp.admin[aTab])LFApp.admin[aTab](box);
 }
 function adminCourses(box){
@@ -1297,6 +1294,7 @@ function route(){
   document.getElementById('mbar').hidden=page!=='course'||!curCourse||curCourse.status==='hidden';
   document.body.classList.toggle('oncourse',page==='course');
   document.documentElement.classList.toggle('inapp',page==='dashboard');
+  document.documentElement.classList.toggle('inadmin',page==='admin');
   renderReviews();
   if(page==='admin')renderAdmin();
   document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('act',a.dataset.nav===page));
