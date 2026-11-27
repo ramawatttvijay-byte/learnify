@@ -550,6 +550,7 @@ footer nav a{text-decoration:none}
 <link rel="stylesheet" href="css/pro.css?v=202611250622">
 <link rel="stylesheet" href="css/cf.css?v=202611250622">
 <link rel="stylesheet" href="css/finish.css?v=202611280250">
+<link rel="stylesheet" href="css/app2.css?v=202611280350">
 </head>
 <body>
 
@@ -910,7 +911,7 @@ const safeUrl=u=>{u=String(u||'').trim();return /^https:\/\/[^\s"'<>]+$/i.test(u
 const blob=id=>id?'/api/img/'+encodeURIComponent(id):'';
 const S={db:null,user:null,assets:null,admin:false,dbC:{},reviews:[],settings:{},loaded:false};
 function allCourses(){
-  const out=courses.map(c=>Object.assign({},c,S.dbC[c.s]||{}));
+  const out=courses.map(c=>{const o=Object.assign({},c,S.dbC[c.s]||{});if(!o.img)o.img=c.img;return o});
   Object.keys(S.dbC).forEach(k=>{if(!SL.includes(k))out.push(Object.assign({s:k,img:'',cat:'Course',by:'Learnify Mentors',d:'',price:2499,status:'soon',modules:[],ord:99},S.dbC[k]))});
   return out.sort((a,b)=>(a.ord??99)-(b.ord??99));
 }
@@ -1243,6 +1244,7 @@ function route(){
   document.querySelectorAll('[data-page]').forEach(el=>el.hidden=el.dataset.page!==page);
   document.getElementById('mbar').hidden=page!=='course'||!curCourse||curCourse.status==='hidden';
   document.body.classList.toggle('oncourse',page==='course');
+  document.documentElement.classList.toggle('inapp',page==='dashboard');
   renderReviews();
   if(page==='admin')renderAdmin();
   document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('act',a.dataset.nav===page));
@@ -1311,7 +1313,7 @@ document.getElementById('lf').addEventListener('submit',e=>{
 </script>
 
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll(".stack td:not([data-l])")){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest("table").rows[0].cells[i]?.textContent||""}}).observe(document,{childList:true,subtree:true})</script>
-<script src="js/app.js?v=202611280250"></script>
+<script src="js/app.js?v=202611280345"></script>
 <script src="js/watch.js?v=202611250622"></script>
 <script src="js/apple.js?v=202611250622"></script>
 </body>

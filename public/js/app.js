@@ -82,10 +82,12 @@ function shell(){
   const nav=MODS.map(([grp,id,label,ic])=>{const h=grp&&grp!==g?`<div class="sg">${grp}</div>`:'';g=grp;return h+`<a href="#${id}" data-m="${id}">${I(IC[ic])}<span>${label}</span></a>`}).join('');
   const wa=L.waLink('Hi, I am '+u.name+', a Learnify student. I need help.');
   return `<div class="ap"><aside class="side2" id="side2" aria-label="Student menu">
+   <a class="brand2" href="#home" aria-label="Learnify home"><img src="logo.webp" alt="Learnify" class="lg-l"><img src="logo-dark.webp" alt="" class="lg-d" aria-hidden="true"></a>
    <div class="me2"><a class="av3" href="#dash-profile" aria-label="My profile">${avatar(u.name,u.avatar,"lg")}</a><span class="mei"><b>${esc(u.name)}</b><small>${esc(maskE(u.email))}</small><span class="pk">${esc(ME.pkg)} plan</span></span></div>
    <a class="meearn" href="#dash-payouts"><small>Total earned</small><b>${inr(ME.all||0)}</b><span>Wallet ${inr(ME.bal||0)} →</span></a>
    <div class="sidenav" role="navigation" aria-label="Dashboard sections">${u.role==='admin'?`<a class="admgo" href="#admin">${I(IC.tool)}<span>Admin panel</span><em>Admin</em></a>`:''}${nav}</div>
    ${wa?`<a class="sidehelp" href="${esc(wa)}" target="_blank" rel="noopener"><b>Need help?</b><small>Message your mentor on WhatsApp</small></a>`:''}
+   <a href="#home" class="site2">${I(IC.home)}<span>Back to website</span></a>
    <a href="#login" class="lo2" id="lo2">${I(IC.out)}<span>Log out</span></a></aside><div class="scrim" id="scrim"></div><main class="mainp" id="mainp"></main></div>`;
 }
 const GROUP_OF=id=>{const m=MODS.find(x=>x[1]===id);return m&&m[0]?m[0]:'Overview'};
@@ -347,6 +349,7 @@ if(LIVE){
  const ownedCourses=()=>{const en=LIVE?LFAPI.enrolled():L.visible().map(c=>c.s);return L.visible().filter(c=>en.includes(c.s))};
  const levelInfo=()=>{let i=MILES.findIndex(m=>ME.all<m.amt);if(i<0)i=MILES.length-1;const prev=i?MILES[i-1].amt:0,nx=MILES[i];const pct=Math.max(0,Math.min(100,Math.round((ME.all-prev)/(nx.amt-prev)*100)));return{i,prev,nx,pct}};
  const walletCard=(big)=>`<section class="walc${big?' big':''}"><div class="wch"><span class="wlogo">L</span><small>Learnify Wallet</small><span class="wcc" aria-hidden="true"></span></div>
+   ${(()=>{const mn=ME.minPayout||500,b=ME.bal||0,pd=ME.pending||0,pc=Math.min(100,Math.round(b/mn*100));return `<div class="wprog"><div class="wpr"><span>${b>=mn?'Ready to withdraw':'Toward your first withdrawal'}</span><b>${pc}%</b></div><span class="wbar"><i style="width:${Math.max(pc,3)}%"></i></span><small>${b>=mn?'Withdraw any amount above '+inr(mn)+'.':pd?inr(pd)+' pending becomes available after the 7-day hold.':'Share your link to earn your first commission.'} Payouts every Monday.</small></div>`})()}
    <small class="wlb">Available to withdraw</small><b class="wamt" data-cu="${ME.bal||0}">${inr(ME.bal||0)}</b>
    <div class="wsplit"><span><i class="g"></i>Pending <b>${inr(ME.pending||0)}</b></span><span><i class="y"></i>Min. withdrawal <b>${inr(ME.minPayout||500)}</b></span></div>
    <div class="wbtns"><a class="wb1" href="#dash-payouts">Withdraw</a><a class="wb2" href="#dash-payouts" data-scroll="hist">History</a></div></section>`;
@@ -575,6 +578,20 @@ if(LIVE){
  window.__lfVerify=verify;
 }
 
+/* ---------- professional pass: training + marketing tools ---------- */
+{
+ const row=(n,t,d,st,cls='')=>`<li class="tr4 ${cls}"><span class="n">${n}</span><span class="tx"><b>${esc(t)}</b><small>${esc(d)}</small></span><span class="st">${st}</span></li>`;
+ VIEWS.training=()=>top('Training')+`<div class="tr4g">
+  <section class="cardp tr4c"><div class="chd"><div><h2>Workshops &amp; masterclasses</h2><p class="muted sm2">Live sessions with your mentor. Dates are shared in class and on WhatsApp.</p></div><span class="tag3 pn">Live</span></div>
+   <ol class="tr4l">${[['Skill to income','How to turn your skill into freelance income, step by step.'],['Finding your first client','Where clients are, how to pitch and how to price your work.'],['Building your portfolio','Turn your homework into proof that wins work.']].map((t,i)=>row(String(i+1).padStart(2,'0'),t[0],t[1],`${I(IC.play)}<span>Live on Zoom</span>`)).join('')}</ol></section>
+  <section class="cardp tr4c"><div class="chd"><div><h2>Affiliate training</h2><p class="muted sm2">Six short modules on earning with your Learnify link.</p></div><span class="tag3">${'6 modules'}</span></div>
+   <ol class="tr4l">${[['Getting started','How affiliate links work and how you earn'],['Your first 10 sales','Who to talk to first and what to say'],['Content that sells','Reels, statuses and posts that bring buyers'],['Handling questions','Answer common doubts with confidence'],['Using WhatsApp well','Broadcasts, groups and follow-ups'],['Growing every month','Set goals and track your progress']].map((t,i)=>row(String(i+1).padStart(2,'0'),t[0],t[1],'<span class="soon">Video soon</span>')).join('')}</ol></section></div>`;
+ VIEWS.tools=()=>{const link=refUrl();const caps=[['WhatsApp status','Learn Meta Ads live with daily Zoom classes, in simple Hinglish. Join here: '],['Instagram caption','Skills that pay, taught live. I am learning with Learnify, you can too: '],['Short message','Want to learn a digital skill that pays? Daily live classes + recordings: ']];
+  const cs=L.visible().filter(c=>thumbOf(c)).slice(0,6);
+  return top('Marketing Tools')+`<section class="cardp mk4l"><div><small class="muted">Your referral link</small><b>${esc(link)}</b><span class="muted sm2">You earn ${inr(ME.comm||625)} on every sale made through this link.</span></div><div class="bs2">${copyBtn('x',link)}<a class="btn pill pill-o" href="https://wa.me/?text=${encodeURIComponent(caps[0][1]+link)}" target="_blank" rel="noopener">${I(IC.chat)} Share on WhatsApp</a></div></section>
+  <h2 class="sec4">Creatives</h2><div class="mk4g">${cs.map(c=>`<figure class="mk4"><img src="${esc(thumbOf(c))}" alt="${esc(c.t)} creative" loading="lazy"><figcaption><b>${esc(c.t)}</b><a href="${esc(thumbOf(c))}" download="learnify-${esc(c.s)}.webp">Download</a></figcaption></figure>`).join('')}</div>
+  <h2 class="sec4">Ready captions</h2><div class="mk4c">${caps.map(c=>`<section class="cardp cap4"><small>${esc(c[0])}</small><p>${esc(c[1])}<span>${esc(link)}</span></p><div class="bs2">${copyBtn('x',c[1]+link)}<a class="btn pill pill-o" href="https://wa.me/?text=${encodeURIComponent(c[1]+link)}" target="_blank" rel="noopener">Share</a></div></section>`).join('')}</div>`};
+}
 window.LFApp={show,verify:id=>window.__lfVerify&&window.__lfVerify(id),page(p){if(p==='packages')renderPackages();if(p==='jobs')renderJobs()},admin:ADMIN,reset(){const r=document.getElementById('app');if(r){r.innerHTML='';delete r.dataset.ready}}};
 plansHome();
 L.route();
