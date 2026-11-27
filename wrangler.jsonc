@@ -16,6 +16,6 @@
     "bindings": [{ "name": "API", "class_name": "Api" }]
   },
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Api"] }],
-  "vars": { "MONGODB_DB": "learnify" },
+  "vars": { "MONGODB_DB": "learnify", "ADMIN_EMAILS": "ramawatttvijay@gmail.com", "PW_ITER": "60000" },
   "observability": { "enabled": true }
 }
