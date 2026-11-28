@@ -1,4 +1,4 @@
-// Learnify API: one handler for every /api/* route (Cloudflare Worker via worker.mjs, or Netlify Function).
+// Learnify Skill API: one handler for every /api/* route (Cloudflare Worker via worker.mjs, or Netlify Function).
 import {
   getDb, newId, now, httpError, json, hashPassword, checkPassword, needsRehash, signToken, verifyToken,
   sessionCookie, clearCookie, readCookie, hmacHex, safeEqual, isEmail, clean, isHttps, driveId, maskEmail
@@ -196,7 +196,7 @@ async function sendMail(to, subject, html) {
   if (!key || !from) return false;
   try {
     const r = await fetch('https://api.brevo.com/v3/smtp/email', { method: 'POST', headers: { 'api-key': key, 'content-type': 'application/json', accept: 'application/json' },
-      body: JSON.stringify({ sender: { name: 'Learnify', email: from }, to: [{ email: to }], subject, htmlContent: html }) });
+      body: JSON.stringify({ sender: { name: 'Learnify Skill', email: from }, to: [{ email: to }], subject, htmlContent: html }) });
     if (!r.ok) console.error('Mail error', r.status, await r.text());
     return r.ok;
   } catch (e) { console.error('Mail error', e); return false; }
@@ -211,8 +211,8 @@ on('POST', '/auth/forgot', async ({ db, req, body }) => {
     else await db.collection('resetRequests').insertOne({ _id: newId('q_'), userId: u._id, status: 'open', createdAt: now(), updatedAt: now() });
     if (process.env.BREVO_API_KEY && (!u.lastResetMail || Date.now() - new Date(u.lastResetMail) > 2 * 60e3)) {
       const link = await makeResetLink(db, req, u);
-      emailed = await sendMail(u.email, 'Reset your Learnify password',
-        `<p>Hi ${u.name.replace(/[<>&]/g, '')},</p><p>Tap the button to set a new password. The link works once and expires in ${RESET_MIN} minutes.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#5b1ff3;color:#fff;border-radius:10px;text-decoration:none">Set new password</a></p><p>If you did not ask for this, ignore this email.</p><p>Team Learnify</p>`);
+      emailed = await sendMail(u.email, 'Reset your Learnify Skill password',
+        `<p>Hi ${u.name.replace(/[<>&]/g, '')},</p><p>Tap the button to set a new password. The link works once and expires in ${RESET_MIN} minutes.</p><p><a href="${link}" style="display:inline-block;padding:12px 22px;background:#5b1ff3;color:#fff;border-radius:10px;text-decoration:none">Set new password</a></p><p>If you did not ask for this, ignore this email.</p><p>Team Learnify Skill</p>`);
       await db.collection('users').updateOne({ _id: u._id }, { $set: { lastResetMail: now() } });
     }
   }
@@ -325,8 +325,8 @@ on('GET', '/certificate/:slug', async ({ db, user, params }) => {
   const id = certId(user._id, slug);
   const ex = await db.collection('certificates').findOne({ _id: id });
   const issued = ex?.issuedAt || prog.updatedAt || now();
-  if (!ex) await db.collection('certificates').insertOne({ _id: id, userId: user._id, name: user.name, slug, course: c.t, mentor: c.by || 'Learnify Mentors', issuedAt: issued });
-  return json({ ready: true, id, name: user.name, avatar: user.avatar || '', course: c.t, mentor: c.by || 'Learnify Mentors', issuedAt: issued, lessons: n });
+  if (!ex) await db.collection('certificates').insertOne({ _id: id, userId: user._id, name: user.name, slug, course: c.t, mentor: c.by || 'Learnify Skill Mentors', issuedAt: issued });
+  return json({ ready: true, id, name: user.name, avatar: user.avatar || '', course: c.t, mentor: c.by || 'Learnify Skill Mentors', issuedAt: issued, lessons: n });
 }, { auth: true });
 
 on('GET', '/verify/:id', async ({ db, params }) => {

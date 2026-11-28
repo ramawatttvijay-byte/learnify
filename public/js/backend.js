@@ -1,4 +1,4 @@
-/* Learnify backend bridge: connects the site to /api (Netlify Functions + MongoDB).
+/* Learnify Skill backend bridge: connects the site to /api (Netlify Functions + MongoDB).
    It offers the small `claude.use()` interface the page was written against, so the
    same admin and data code works on the live site. Loaded in <head>, before the page script. */
 (function () {
@@ -107,7 +107,7 @@
     try {
       const [o] = await Promise.all([j('/pay/order', { method: 'POST', body: JSON.stringify({ kind, id }) }), loadRzp()]);
       const rz = new window.Razorpay({
-        key: o.keyId, order_id: o.rpOrderId, amount: o.amount, currency: 'INR', name: 'Learnify', description: o.title,
+        key: o.keyId, order_id: o.rpOrderId, amount: o.amount, currency: 'INR', name: 'Learnify Skill', description: o.title,
         prefill: { name: o.name, email: o.email, contact: o.phone }, theme: { color: '#5b1ff3' },
         handler: async resp => {
           try {

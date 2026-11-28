@@ -1,4 +1,4 @@
-/* Learnify — lecture player ("watch" page).
+/* Learnify Skill — lecture player ("watch" page).
    Route: #watch-<course-slug>  or  #watch-<course-slug>/<lesson number>
    Layout: video on the left, the whole lesson series on the right (below on phones).
    Enrolled students and admins get every lesson; everyone else gets the free previews
