@@ -82,7 +82,7 @@ function shell(){
   const nav=MODS.map(([grp,id,label,ic])=>{const h=grp&&grp!==g?`<div class="sg">${grp}</div>`:'';g=grp;return h+`<a href="#${id}" data-m="${id}">${I(IC[ic])}<span>${label}</span></a>`}).join('');
   const wa=L.waLink('Hi, I am '+u.name+', a Learnify Skill student. I need help.');
   return `<div class="ap"><aside class="side2" id="side2" aria-label="Student menu">
-   <a class="brand2" href="#home" aria-label="Learnify Skill home"><img src="logo.webp" alt="Learnify Skill" class="lg-l"><img src="logo-dark.webp" alt="" class="lg-d" aria-hidden="true"></a>
+   <a class="brand2" href="#home" aria-label="Learnify Skill home"><img src="logo-skill.webp" alt="Learnify Skill" class="lg-l"><img src="logo-skill-dark.webp" alt="" class="lg-d" aria-hidden="true"></a>
    <div class="me2"><a class="av3" href="#dash-profile" aria-label="My profile">${avatar(u.name,u.avatar,"lg")}</a><span class="mei"><b>${esc(u.name)}</b><small>${esc(maskE(u.email))}</small><span class="pk">${esc(ME.pkg)} plan</span></span></div>
    <a class="meearn" href="#dash-payouts"><small>Total earned</small><b>${inr(ME.all||0)}</b><span>Wallet ${inr(ME.bal||0)} →</span></a>
    <div class="sidenav" role="navigation" aria-label="Dashboard sections">${u.role==='admin'?`<a class="admgo" href="#admin">${I(IC.tool)}<span>Admin panel</span><em>Admin</em></a>`:''}${nav}</div>
@@ -514,7 +514,7 @@ if(LIVE){
    else{const p=r.total?Math.round(r.done/r.total*100):0;st.className='tg2 pu';st.textContent=p+'% complete';requestAnimationFrame(()=>bar.style.width=p+'%');tx.textContent=r.total?`${r.done} of ${r.total} lessons done · finish all to unlock`:'Lessons coming soon';b.textContent='Continue course';b.disabled=false;b.onclick=()=>location.hash='#watch-'+s}}catch(e){}}};
  function openCert(r){const ov=document.createElement('div');ov.className='certov';const url=location.origin+'/#verify-'+r.id;
   ov.innerHTML=`<div class="certbar"><button type="button" class="pr" id="cPr">Download PDF</button><button type="button" id="cX">Close</button></div>
-  <div class="cert3"><div class="cfr"></div><div class="cin"><div class="ctop"><img src="logo.webp" alt="Learnify Skill"><div class="cid">Certificate ID ${esc(r.id)}<br>Verify at ${esc(url.replace(/^https?:\/\//,''))}</div></div>
+  <div class="cert3"><div class="cfr"></div><div class="cin"><div class="ctop"><img src="logo-skill.webp" alt="Learnify Skill"><div class="cid">Certificate ID ${esc(r.id)}<br>Verify at ${esc(url.replace(/^https?:\/\//,''))}</div></div>
    <div class="ckick">Certificate of completion</div><div class="cttl">${esc(r.course)}</div>
    <div class="cpres">This certifies that</div><div class="cname">${avatar(r.name,r.avatar)}<h2>${esc(r.name)}</h2></div>
    <p class="cfor">has successfully completed all <b>${r.lessons} lessons</b> of the <b>${esc(r.course)}</b> programme at Learnify Skill, including recorded lessons, live sessions and practical assignments.</p>

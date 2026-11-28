@@ -18,7 +18,7 @@
 /index.html
   Cache-Control: no-cache
 
-/og.jpg
+/og-skill.jpg
   Cache-Control: public, max-age=86400
 
 /*.png
